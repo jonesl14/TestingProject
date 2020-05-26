@@ -65,7 +65,10 @@ public class fixedWorldGen : MonoBehaviour
             }
         }
 
-        StartCoroutine(spawnOnlyChunksThatAreNeeded());
+        //StartCoroutine(spawnOnlyChunksThatAreNeeded());
+        StartCoroutine(spawnSpiralChunks());
+
+        //StartCoroutine(globalShowChunks());
         
     }
 
@@ -167,7 +170,7 @@ public class fixedWorldGen : MonoBehaviour
 
     //private List<GameObject> blocksToBeBroken = new List<GameObject>();
 
-    public void breakChunkBlockByPosition2(Vector3 chunkPos, int blockChildNum)//changeNeed
+    /*public void breakChunkBlockByPosition2(Vector3 chunkPos, int blockChildNum)//changeNeed
     {
         Transform chunkBlockToBeBroken = transform.Find(chunkPos + "").transform;
 
@@ -314,7 +317,7 @@ public class fixedWorldGen : MonoBehaviour
                 retrieveChunkByPosition(chunkPos, 5).transform.GetChild(0).transform.GetChild(blockChildNum + (worldDimensions * worldDimensions * (worldDimensions - 1))).GetComponent<BlockBreaking>().instaKillBlock2();
             }
         }
-    }
+    }*/
 
     public void breakChunkBlockRecursive(Vector3 chunkPos, int blockChildNum)//changeNeed
     {
@@ -447,7 +450,9 @@ public class fixedWorldGen : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.G))
             {
                 loopsToPerform += 1;
-                StartCoroutine(spawnOnlyChunksThatAreNeeded());
+                resetChunkNum = false;
+                StartCoroutine(spawnSpiralChunks());
+                //StartCoroutine(spawnOnlyChunksThatAreNeeded());
             }
         }
 
@@ -486,6 +491,7 @@ public class fixedWorldGen : MonoBehaviour
 
 
 
+    int tempBlockNumbers = 0;
     IEnumerator spawnOnlyChunksThatAreNeeded()
     {
         GameObject tempChunkHolder;// = null;
@@ -496,7 +502,9 @@ public class fixedWorldGen : MonoBehaviour
                 chunkPosition.y -= worldDimensions;
                 //tempChunkHolder = null;
                 tempChunkHolder = Instantiate(chunkToGen, chunkPosition, transform.rotation, worldBlockOriginPoint.transform);
-                tempChunkHolder.name = chunkPosition + "";
+                //tempChunkHolder.name = chunkPosition + "";
+                tempChunkHolder.name = tempBlockNumbers + "";
+                tempBlockNumbers++;
 //                buildNewListChunkImproved(tempChunkHolder);
             }
             chunkPosition.y += worldDimensions * depthCount;
@@ -537,8 +545,11 @@ public class fixedWorldGen : MonoBehaviour
                     chunkPosition.z -= worldDimensions;//move down * number of loops
                     //tempChunkHolder = null;
                     tempChunkHolder = Instantiate(chunkToGen, chunkPosition, transform.rotation, worldBlockOriginPoint.transform);
-                    tempChunkHolder.name = chunkPosition + "";
-//                    buildNewListChunkImproved(tempChunkHolder);
+                    //tempChunkHolder.name = chunkPosition + "";
+                    tempChunkHolder.name = tempBlockNumbers + "";
+                    tempBlockNumbers++;
+
+                    //                    buildNewListChunkImproved(tempChunkHolder);
                     tempLoopsPerformed--;
 
                     buildChunksDown();
@@ -551,8 +562,11 @@ public class fixedWorldGen : MonoBehaviour
                     chunkPosition.x -= worldDimensions;//move left 1 spot then * number of loops
                     //tempChunkHolder = null;
                     tempChunkHolder = Instantiate(chunkToGen, chunkPosition, transform.rotation, worldBlockOriginPoint.transform);
-                    tempChunkHolder.name = chunkPosition + "";
-//                    buildNewListChunkImproved(tempChunkHolder);
+                    //tempChunkHolder.name = chunkPosition + "";
+                    tempChunkHolder.name = tempBlockNumbers + "";
+                    tempBlockNumbers++;
+
+                    //                    buildNewListChunkImproved(tempChunkHolder);
                     tempLoopsPerformed--;
 
                     buildChunksDown();
@@ -565,8 +579,11 @@ public class fixedWorldGen : MonoBehaviour
                     chunkPosition.z += worldDimensions;//move up 1 spot then * number of loops
                     //tempChunkHolder = null;
                     tempChunkHolder = Instantiate(chunkToGen, chunkPosition, transform.rotation, worldBlockOriginPoint.transform);
-                    tempChunkHolder.name = chunkPosition + "";
-//                    buildNewListChunkImproved(tempChunkHolder);
+                    //tempChunkHolder.name = chunkPosition + "";
+                    tempChunkHolder.name = tempBlockNumbers + "";
+                    tempBlockNumbers++;
+
+                    //                    buildNewListChunkImproved(tempChunkHolder);
                     tempLoopsPerformed--;
 
                     buildChunksDown();
@@ -579,8 +596,11 @@ public class fixedWorldGen : MonoBehaviour
                     chunkPosition.x += worldDimensions;//move right 1 spot then * number of loops
                     //tempChunkHolder = null;
                     tempChunkHolder = Instantiate(chunkToGen, chunkPosition, transform.rotation, worldBlockOriginPoint.transform);
-                    tempChunkHolder.name = chunkPosition + "";
-//                    buildNewListChunkImproved(tempChunkHolder);
+                    //tempChunkHolder.name = chunkPosition + "";
+                    tempChunkHolder.name = tempBlockNumbers + "";
+                    tempBlockNumbers++;
+
+                    //                    buildNewListChunkImproved(tempChunkHolder);
                     tempLoopsPerformed--;
 
                     buildChunksDown();
@@ -594,8 +614,11 @@ public class fixedWorldGen : MonoBehaviour
                     chunkPosition.z -= worldDimensions;//move down * number of loops
                     //tempChunkHolder = null;
                     tempChunkHolder = Instantiate(chunkToGen, chunkPosition, transform.rotation, worldBlockOriginPoint.transform);
-                    tempChunkHolder.name = chunkPosition + "";
-//                    buildNewListChunkImproved(tempChunkHolder);
+                    //tempChunkHolder.name = chunkPosition + "";
+                    tempChunkHolder.name = tempBlockNumbers + "";
+                    tempBlockNumbers++;
+
+                    //                    buildNewListChunkImproved(tempChunkHolder);
                     tempLoopsPerformed--;
 
                     buildChunksDown();
@@ -613,8 +636,11 @@ public class fixedWorldGen : MonoBehaviour
             {
                 //tempChunkHolder = null;
                 tempChunkHolder = Instantiate(chunkToGen, chunkPosition, transform.rotation, worldBlockOriginPoint.transform);
-                tempChunkHolder.name = chunkPosition + "";
-//                buildNewListChunkImproved(tempChunkHolder);
+                //tempChunkHolder.name = chunkPosition + "";
+                tempChunkHolder.name = tempBlockNumbers + "";
+                tempBlockNumbers++;
+
+                //                buildNewListChunkImproved(tempChunkHolder);
                 buildChunksDown();
             }
             loopsPerformed++;
@@ -638,5 +664,474 @@ public class fixedWorldGen : MonoBehaviour
             playerRef.GetComponent<Camera>().cullingMask = -1;
         }*/
         //UnityEngine.Debug.Log(playerRef.GetComponent<Camera>().cullingMask);
+    }
+
+    int oldLoopsToPerform = -1;
+    bool resetChunkNum = true;
+    IEnumerator spawnSpiralChunks()
+    {
+        GameObject tempChunkHolder;
+        /*void buildChunksDown()
+        {
+            for (int epochCount = 0; epochCount < depthCount; epochCount++)
+            {
+                chunkPosition.y -= worldDimensions;
+                tempChunkHolder = Instantiate(chunkToGen, chunkPosition, transform.rotation, worldBlockOriginPoint.transform);
+                tempChunkHolder.transform.SetSiblingIndex((int)(tempBlockNumbers + (4 * Mathf.Pow(loopsToPerform, 2) - 4 * (loopsToPerform) + 1)));
+                tempChunkHolder.name = (int)(tempBlockNumbers + (4 * Mathf.Pow(loopsToPerform, 2) - 4 * (loopsToPerform) + 1)) + "";
+                tempBlockNumbers++;
+            }
+            chunkPosition.y += worldDimensions * depthCount;
+        }*/
+        chunkPosition = originVector;
+        for (int epochCount = 0; epochCount <= depthCount; epochCount++)
+        {
+            while (loopsPerformed < loopsToPerform)
+            {
+                chunkPosition.z = originVector.z;
+                yield return new WaitForFixedUpdate();
+                if (loopsPerformed > 0)
+                {
+                    tempLoopsPerformed = loopsPerformed;
+                    while (tempLoopsPerformed > 0)
+                    {
+                        chunkPosition.x += worldDimensions;//move right * number of loops along the X axis
+                        chunkPosition.z -= worldDimensions;
+                        tempLoopsPerformed--;
+                    }
+
+
+                    /*chunkPosition.z -= worldDimensions;
+                    if (loopsPerformed > 1)
+                    {
+                        chunkPosition.z -= worldDimensions;
+                    }*/
+                    //if(depthCount > 0 && oldLoopsToPerform != -1 && !resetChunkNum)
+                    if(!resetChunkNum)
+                    {
+                        resetChunkNum = true;
+                        //tempBlockNumbers = transform.childCount / 2;
+                        tempBlockNumbers = (int)(4 * Mathf.Pow(loopsToPerform-1, 2) - 4 * (loopsToPerform-1) + 1);
+                        //UnityEngine.Debug.Log((transform.childCount / 2) + "____" + (4 * Mathf.Pow(loopsToPerform, 2) - 4 * (loopsToPerform) + 1));
+                    }
+                    if(resetChunkNum && tempBlockNumbers == (int)(4 * Mathf.Pow(loopsToPerform, 2) - 4 * (loopsToPerform) + 1))
+                    {
+                        //The number being added to loopsToPerform will likely need to be based on how many loops have been completed or need to be done.
+                        tempBlockNumbers = (int)(4 * Mathf.Pow(loopsToPerform + 2, 2) - 4 * (loopsToPerform + 2) + 1);
+                    }
+
+                    tempChunkHolder = Instantiate(chunkToGen, chunkPosition, transform.rotation, worldBlockOriginPoint.transform);//This will make the down-right diagonal
+                    tempChunkHolder.transform.SetSiblingIndex(tempBlockNumbers);
+                    tempChunkHolder.name = tempBlockNumbers + "";
+                    tempBlockNumbers++;
+                    //buildChunksDown();
+
+                    tempLoopsPerformed = loopsPerformed * 2;
+                    while (tempLoopsPerformed > 0)
+                    {
+                        chunkPosition.x -= worldDimensions;//move left 1 spot then * number of loops
+                        tempChunkHolder = Instantiate(chunkToGen, chunkPosition, transform.rotation, worldBlockOriginPoint.transform);
+                        tempChunkHolder.transform.SetSiblingIndex(tempBlockNumbers);
+                        tempChunkHolder.name = tempBlockNumbers + "";
+                        tempBlockNumbers++;
+                        tempLoopsPerformed--;
+                        //buildChunksDown();
+                    }
+
+                    tempLoopsPerformed = loopsPerformed * 2;
+                    while (tempLoopsPerformed > 0)
+                    {
+                        chunkPosition.z += worldDimensions;//move up 1 spot then * number of loops
+                        tempChunkHolder = Instantiate(chunkToGen, chunkPosition, transform.rotation, worldBlockOriginPoint.transform);
+                        tempChunkHolder.transform.SetSiblingIndex(tempBlockNumbers);
+                        tempChunkHolder.name = tempBlockNumbers + "";
+                        tempBlockNumbers++;
+                        tempLoopsPerformed--;
+                        //buildChunksDown();
+                    }
+
+                    tempLoopsPerformed = loopsPerformed * 2;
+                    while (tempLoopsPerformed > 0)
+                    {
+                        chunkPosition.x += worldDimensions;//move right 1 spot then * number of loops
+                        tempChunkHolder = Instantiate(chunkToGen, chunkPosition, transform.rotation, worldBlockOriginPoint.transform);
+                        tempChunkHolder.transform.SetSiblingIndex(tempBlockNumbers);
+                        tempChunkHolder.name = tempBlockNumbers + "";
+                        tempBlockNumbers++;
+                        tempLoopsPerformed--;
+                        //buildChunksDown();
+                    }
+
+                    tempLoopsPerformed = (loopsPerformed * 2) - 1;
+                    while (tempLoopsPerformed > 0)
+                    {
+                        chunkPosition.z -= worldDimensions;//move down * number of loops
+                        tempChunkHolder = Instantiate(chunkToGen, chunkPosition, transform.rotation, worldBlockOriginPoint.transform);
+                        tempChunkHolder.transform.SetSiblingIndex(tempBlockNumbers);
+                        tempChunkHolder.name = tempBlockNumbers + "";
+                        //findChunkLoopNum(tempBlockNumbers, 0);
+                        tempBlockNumbers++;
+                        tempLoopsPerformed--;
+                        //buildChunksDown();
+                    }
+
+                    tempLoopsPerformed = loopsPerformed;
+                    while (tempLoopsPerformed > 0)
+                    {
+                        chunkPosition.x -= worldDimensions;
+                        tempLoopsPerformed--;
+                    }
+                }
+                if (loopsPerformed == 0)
+                {
+                    tempChunkHolder = Instantiate(chunkToGen, chunkPosition, transform.rotation, worldBlockOriginPoint.transform);
+                    tempChunkHolder.transform.SetSiblingIndex(tempBlockNumbers);
+                    tempChunkHolder.name = tempBlockNumbers + "";
+                    tempBlockNumbers++;
+                    //buildChunksDown();
+                }
+                loopsPerformed++;
+            }
+            if (depthCount > 0)
+            {
+                if (oldLoopsToPerform == -1)
+                {
+                    loopsPerformed = 0;
+                }
+                else
+                {
+                    loopsPerformed = oldLoopsToPerform;
+                }
+                chunkPosition = originVector;
+                chunkPosition.y -= worldDimensions;
+            }
+            oldLoopsToPerform = loopsToPerform;
+        }
+    }
+
+    private int findChunkLoopNum(int nameNum, int direction)
+    {
+        //For adding new chunks to the parent use trasform.SetSiblingIndex(x);
+        //For handling depth, use (4n^2 - 4n +1) where n=numOfLoops-1
+        int upChunk = -99, downChunk = -99, leftChunk = -99, rightChunk = -99, aboveChunk = -99, belowChunk = -99;
+        for (int i = 1; i <= worldDimensions; i++)
+        {
+            int upLeft = (int)(1 + 4 * Mathf.Pow(i, 2));
+            int upRight = (int)(1 + 2 * i + 4 * Mathf.Pow(i, 2));
+            
+            int downLeft = (int)(1 - 2 * i + 4 * Mathf.Pow(i, 2));
+            int downRight = (int)(1 - 4 * i + 4 * Mathf.Pow(i, 2));
+            int downRightPlusOne = (int)(1 - 4 * (i+1) + 4 * Mathf.Pow((i + 1), 2));
+
+            aboveChunk = (int)(nameNum - (4 * Mathf.Pow(loopsToPerform - 1, 2) - 4 * (loopsToPerform-1) + 1));
+            belowChunk = (int)(nameNum + (4 * Mathf.Pow(loopsToPerform, 2) - 4 * (loopsToPerform) + 1));
+            if(nameNum == 8)
+            UnityEngine.Debug.Log(aboveChunk + "___" + belowChunk);
+
+            if (nameNum == 0)
+            {
+                upChunk = 6;
+                downChunk = 2;
+                leftChunk = 4;
+                rightChunk = 8;
+            }
+
+            if (nameNum == upLeft)
+            {
+                upChunk = nameNum + 13 + (8 * (i - 1));
+                downChunk = nameNum - 1;
+                leftChunk = nameNum + 11 + (8 * (i - 1));
+                rightChunk = nameNum + 1;
+                //fifth column(T)
+                UnityEngine.Debug.Log("upLeft" + nameNum + "\t\t" + upChunk + "upChunk\t" + downChunk + "downChunk\t" + leftChunk + "leftChunk\t" + rightChunk + "rightChunk\t");
+            }
+            if (nameNum == upRight)
+            {
+                upChunk = nameNum + 13 + (8 * (i - 1));
+                downChunk = nameNum + 1;
+                leftChunk = nameNum - 1;
+                rightChunk = nameNum + 15 + (8 * (i - 1));
+                //sixth column(U)
+                UnityEngine.Debug.Log("upRight" + nameNum + "\t\t" + upChunk + "upChunk\t" + downChunk + "downChunk\t" + leftChunk + "leftChunk\t" + rightChunk + "rightChunk\t");
+            }
+            if(nameNum == downLeft)
+            {
+                upChunk = nameNum + 1;
+                downChunk = nameNum + 9 + (8 * (i - 1));
+                leftChunk = nameNum + 11 + (8 * (i - 1));
+                rightChunk = nameNum - 1;
+                //seventh column(V)
+                UnityEngine.Debug.Log("downLeft" + nameNum + "\t\t" + upChunk + "upChunk\t" + downChunk + "downChunk\t" + leftChunk + "leftChunk\t" + rightChunk + "rightChunk\t");
+            }
+            if (nameNum == downRight)
+            {
+                if(nameNum == 1)
+                {
+                    upChunk = 8;
+                    rightChunk = nameNum + 15 + (8 * (i));
+                }
+                else
+                {
+                    upChunk = nameNum - 1;
+                    rightChunk = nameNum + 15 + (8 * (i - 1));
+                }
+                downChunk = nameNum + 9 + (8 * (i - 1));
+                leftChunk = nameNum + 1;
+                //eighth column(W)
+                UnityEngine.Debug.Log("downRight" + nameNum + "\t\t" + upChunk + "upChunk\t" + downChunk + "downChunk\t" + leftChunk + "leftChunk\t" + rightChunk + "rightChunk\t");
+            }
+
+
+
+            if (nameNum > upLeft && nameNum < upRight)//Top side
+            {
+                upChunk = nameNum + 13 + (8 * (i - 1));
+                downChunk = nameNum - 5 - (8 * (i - 1));
+                if (i == 1)
+                    downChunk -= 1;
+                leftChunk = nameNum - 1;
+                rightChunk = nameNum + 1;
+                //first column(P)
+                UnityEngine.Debug.Log("column P" + nameNum + "\t\t" + upChunk + "upChunk\t" + downChunk + "downChunk\t" + leftChunk + "leftChunk\t" + rightChunk + "rightChunk\t");
+            }
+            if(nameNum < upLeft && nameNum > downLeft)//Left side
+            {
+                upChunk = nameNum + 1;
+                downChunk = nameNum - 1;
+                leftChunk = nameNum + 11 + (8 * (i - 1));
+                rightChunk = nameNum - 3 - (8 * (i - 1));
+                if (i == 1)
+                    rightChunk -= 1;
+                //second column(Q)
+                UnityEngine.Debug.Log("column Q" + nameNum + "\t\t" + upChunk + "upChunk\t" + downChunk + "downChunk\t" + leftChunk + "leftChunk\t" + rightChunk + "rightChunk\t");
+            }
+            if (nameNum > upRight && nameNum < downRightPlusOne)//Right side
+            {//Will require extra work
+                upChunk = nameNum - 1;
+                if (nameNum + 1 == (int)(1 - 4 * (i + 1) + 4 * Mathf.Pow((i + 1), 2)))
+                {
+                    UnityEngine.Debug.Log(i);
+                    downChunk = downRight;
+                    leftChunk = nameNum - (7 + (8*(i-2)))  - (8 * i);
+                    if (i == 1)
+                        leftChunk -= 1;
+                }
+                else
+                {
+                    downChunk = nameNum + 1;
+                    leftChunk = nameNum - 15 - (8 * (i - 2));
+                }
+                rightChunk = nameNum + 15 + (8 * (i - 1));
+                //third column(R)
+                UnityEngine.Debug.Log("column R" + nameNum + "\t\t" + upChunk + "upChunk\t" + downChunk + "downChunk\t" + leftChunk + "leftChunk\t" + rightChunk + "rightChunk\t");
+            }
+            if (nameNum < downLeft && nameNum > downRight)//Bottom side
+            {
+                upChunk = nameNum - 1 - (8 * (i-1));
+                if (i == 1)
+                    upChunk -= 1;
+                downChunk = nameNum + 9 + (8 * (i - 1));
+                leftChunk = nameNum + 1;
+                rightChunk = nameNum - 1;
+                //fourth column(S)
+                UnityEngine.Debug.Log("column S" + nameNum + "\t\t" + upChunk + "upChunk\t" + downChunk + "downChunk\t" + leftChunk + "leftChunk\t" + rightChunk + "rightChunk\t");
+            }
+
+            //UnityEngine.Debug.Log(upLeft + "upLeft\t" + upRight + "upRight\t" + downLeft + "downLeft\t" + downRight + "downRight");
+        }
+
+        switch(direction)
+        {
+            case 0://top
+                //calculate top chunk
+                break;
+            case 1://right
+                if (rightChunk != -99)
+                    return rightChunk;
+                break;
+            case 2://bottom
+                //calculate bottom chunk
+                break;
+            case 3://left
+                if (leftChunk != -99)
+                    return leftChunk;
+                break;
+            case 4://front
+                if (upChunk != -99)
+                    return upChunk;
+                break;
+            case 5://back
+                if (downChunk != -99)
+                    return downChunk;
+                break;
+        }
+        return -99;//desired direction wasn't found
+    }
+
+    int showLoopsAroundPlayer = 3;//Distance around the player
+    int showLoopsPerformed = 1;
+    int showTempLoopsPerformed = 0;
+
+    /// <summary>
+    /// To properly enable this method:
+    /// 1) call it in Start()
+    /// 2) comment out the two coroutine calls in chunkDistanceCalc (checkIfShouldShow && checkSurroundingChunks)
+    /// 3) comment out the setActive(false) in dynamicChunkBuilder (tempNewBlock.SetActive(false))
+    /// </summary>
+    /// <returns></returns>
+    private IEnumerator globalShowChunks()
+    {
+        Transform foundChunkToShow;
+        Vector3 playerChunkPos = playerRef.transform.position;
+        Vector3 oldPlayerPos = new Vector3( -99, -99, -99 );
+        List<Vector3> foundChunksToActivate = new List<Vector3>();
+        bool playerHasMoved = true;
+        /*void buildChunksDown()
+        {
+            for (int epochCount = 0; epochCount < depthCount; epochCount++)
+            {
+                playerChunkPos.y -= worldDimensions;
+            }
+            playerChunkPos.y += worldDimensions * depthCount;
+        }*/
+
+        void checkChunkPos()
+        {
+            playerChunkPos.x = (Mathf.RoundToInt(playerChunkPos.x / worldDimensions) * worldDimensions);
+            playerChunkPos.y = 0.0f;// = (Mathf.RoundToInt(playerChunkPos.y / worldDimensions) * worldDimensions);
+            playerChunkPos.z = (Mathf.RoundToInt(playerChunkPos.z / worldDimensions) * worldDimensions);
+            if (foundChunkToShow = transform.Find(playerChunkPos + ""))
+            {
+                //foundChunkToShow.name = "these";
+                //UnityEngine.Debug.Log(foundChunkToShow.name);
+                foundChunksToActivate.Add(playerChunkPos);
+                //foundChunkToShow.gameObject.SetActive(true);
+                //foundChunkToShow.transform.GetChild(0).gameObject.SetActive(true);
+            }
+        }
+        void cycleChunks()
+        {
+            /*foreach(Transform child in transform)
+            {
+                child.gameObject.SetActive(false);
+            }*/
+            foreach(Vector3 childName in foundChunksToActivate)
+            {
+                transform.Find(childName + "").gameObject.SetActive(true);
+                transform.Find(childName + "").transform.GetChild(0).gameObject.SetActive(true);
+            }
+            foundChunksToActivate.Clear();
+        }
+
+        yield return new WaitForSeconds(2);
+
+        while (true)
+        {
+            //yield return new WaitForSeconds(1);
+            yield return new WaitForFixedUpdate();
+            playerChunkPos = playerRef.transform.position;
+            playerChunkPos.x = (Mathf.RoundToInt(playerChunkPos.x / worldDimensions) * worldDimensions);
+            playerChunkPos.y = 0.0f;
+            playerChunkPos.z = (Mathf.RoundToInt(playerChunkPos.z / worldDimensions) * worldDimensions);
+
+            /*if(Vector3.Distance(playerChunkPos, oldPlayerPos) == 0 && playerHasMoved)     //check if player Moved
+            {
+                UnityEngine.Debug.Log("no change");
+                playerHasMoved = false;
+            }
+            else if(Vector3.Distance(playerChunkPos, oldPlayerPos) != 0 && !playerHasMoved)
+            {
+                UnityEngine.Debug.Log(Vector3.Distance(playerChunkPos, oldPlayerPos));
+                playerHasMoved = true;
+            }*/
+            showLoopsAroundPlayer = 3;
+            showLoopsPerformed = 1;
+            showTempLoopsPerformed = 0;
+            //UnityEngine.Debug.Log(playerChunkPos + " NEW SET OF CHUNKS\n\n");
+
+
+            while (showLoopsPerformed < showLoopsAroundPlayer)
+            {
+                yield return new WaitForFixedUpdate();
+                //yield return new WaitForSeconds(1);
+
+                if (showLoopsPerformed > 0)
+                {
+                    showTempLoopsPerformed = showLoopsPerformed;
+                    while (showTempLoopsPerformed > 0)
+                    {
+                        playerChunkPos.x += worldDimensions;//move right * number of loops along the X axis
+                        checkChunkPos();
+                        showTempLoopsPerformed--;
+                    }
+
+                    showTempLoopsPerformed = showLoopsPerformed;
+                    while (showTempLoopsPerformed > 0)
+                    {
+                        playerChunkPos.z -= worldDimensions;//move down * number of loops
+                        checkChunkPos();
+                        showTempLoopsPerformed--;
+
+                        //buildChunksDown();
+                    }
+
+                    showTempLoopsPerformed = showLoopsPerformed * 2;
+                    while (showTempLoopsPerformed > 0)
+                    {
+                        playerChunkPos.x -= worldDimensions;//move left 1 spot then * number of loops
+                        checkChunkPos();
+                        showTempLoopsPerformed--;
+
+                        //buildChunksDown();
+                    }
+
+                    showTempLoopsPerformed = showLoopsPerformed * 2;
+                    while (showTempLoopsPerformed > 0)
+                    {
+                        playerChunkPos.z += worldDimensions;//move up 1 spot then * number of loops
+                        checkChunkPos();
+                        showTempLoopsPerformed--;
+
+                        //buildChunksDown();
+                    }
+
+                    showTempLoopsPerformed = showLoopsPerformed * 2;
+                    while (showTempLoopsPerformed > 0)
+                    {
+                        playerChunkPos.x += worldDimensions;//move right 1 spot then * number of loops
+                        checkChunkPos();
+                        showTempLoopsPerformed--;
+
+                        //buildChunksDown();
+                    }
+
+                    showTempLoopsPerformed = showLoopsPerformed;
+                    while (showTempLoopsPerformed > 0)
+                    {
+                        playerChunkPos.z -= worldDimensions;//move down * number of loops
+                        checkChunkPos();
+                        showTempLoopsPerformed--;
+
+                        //buildChunksDown();
+                    }
+                    showTempLoopsPerformed = showLoopsPerformed;
+                    while (showTempLoopsPerformed > 0)
+                    {
+                        playerChunkPos.x -= worldDimensions;
+                        checkChunkPos();
+                        showTempLoopsPerformed--;
+                    }
+                }
+                /*if (loopsPerformed == 0)
+                {
+                    tempChunkHolder = Instantiate(chunkToGen, chunkPosition, transform.rotation, worldBlockOriginPoint.transform);
+                    tempChunkHolder.name = chunkPosition + "";
+                    buildChunksDown();
+                }*/
+                showLoopsPerformed++;
+            }
+            cycleChunks();
+            oldPlayerPos = playerChunkPos;
+        }
     }
 }

@@ -207,10 +207,10 @@ public class chunkDistanceCalc : MonoBehaviour
 
             blockIndex++;
         }
-        if (transform.position.y == 0)
+        /*if (transform.position.y == 0)
         {
             GameObject.Find("OriginPoint").GetComponent<genMobsOnChunks>().spawnMob(transform);
-        }
+        }*/
     }
     private Vector3 posToCheck;
     private bool chunkTop, chunkRight, chunkBottom, chunkLeft, chunkFront, chunkBack, allChunks;
