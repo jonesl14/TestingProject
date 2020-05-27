@@ -54,7 +54,7 @@ public class chunkDistanceCalc : MonoBehaviour
 
         for (int epochCount = 0; epochCount < 10; epochCount++)
         {
-            transform.GetChild(0).transform.GetChild(UnityEngine.Random.Range(0, cubedWorldDimensions)).GetComponent<BlockBreaking>().instaKillBlock();
+            //transform.GetChild(0).transform.GetChild(UnityEngine.Random.Range(0, cubedWorldDimensions)).GetComponent<BlockBreaking>().instaKillBlock();
             //transform.GetChild(0).transform.GetChild(UnityEngine.Random.Range(0, cubedWorldDimensions)).GetComponent<BlockBreaking>().killBlock();
         }
 
@@ -413,11 +413,179 @@ public class chunkDistanceCalc : MonoBehaviour
             //checkAroundBlocks(blockNum);
             //UnityEngine.Debug.Log(blockNum);
             transform.GetChild(0).transform.GetChild(blockNum).gameObject.SetActive(false);
+            breakBlockAndShowSurrounds(blockNum);
             //UnityEngine.Debug.Log(transform.GetChild(0).transform.GetChild(blockNum).gameObject.activeSelf);
         }
 
         showing = false;
         showingClose = false;
+    }
+
+    private void breakBlockAndShowSurrounds(int blockChildNum)
+    {
+        GameObject foundChunk;
+
+        //UnityEngine.Debug.Log(GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 0) + " top");
+        //top
+        if (blockChildNum % (worldDimensions * worldDimensions) >= worldDimensions)
+        {
+            //blockChildNum - worldDimensions
+            if (checkChild(blockChildNum - worldDimensions) != 0)
+            {
+                changeBlockState(blockChildNum - worldDimensions, 1);
+            }
+        }
+        //else if (foundChunk = transform.parent.transform.GetChild(GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 0)).gameObject)
+        //else if (transform.parent.transform.GetChild(GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 0)))
+        else if (GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 0) < transform.parent.childCount && GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 0) > 0)
+        {
+            UnityEngine.Debug.Log("broke top of " + transform.GetSiblingIndex());
+            foundChunk = transform.parent.transform.GetChild(GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 0)).gameObject;
+            UnityEngine.Debug.Log("found " + foundChunk.transform.GetSiblingIndex());
+            //blockChildNum + (worldDimensions * (worldDimensions - 1))
+            if (foundChunk.GetComponent<chunkDistanceCalc>().checkChild(blockChildNum + (worldDimensions * (worldDimensions - 1))) != 0)
+            {
+                foundChunk.GetComponent<chunkDistanceCalc>().changeBlockState(blockChildNum + (worldDimensions * (worldDimensions - 1)), 1);
+            }
+        }
+
+        //UnityEngine.Debug.Log(GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 1) + " right");
+        //right
+        if ((blockChildNum + 1) % worldDimensions != 0)// || blockChildNum == 0)
+        {
+            //blockChildNum + 1
+            if (checkChild(blockChildNum + 1) != 0)
+            {
+                changeBlockState(blockChildNum + 1, 1);
+            }
+        }
+        //else if (foundChunk = retrieveChunkByPosition(chunkPos, 1))
+        //else if (foundChunk = transform.parent.transform.GetChild(GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 1)).gameObject)
+        //else if(transform.parent.transform.GetChild(GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 1)))
+        else if (GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 1) < transform.parent.childCount && GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 1) >= 0)
+        {
+            UnityEngine.Debug.Log("broke right of " + transform.GetSiblingIndex());
+            foundChunk = transform.parent.transform.GetChild(GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 1)).gameObject;
+            UnityEngine.Debug.Log("found " + foundChunk.transform.GetSiblingIndex());
+
+            if (foundChunk.transform.position.y == transform.position.y)
+            {
+                //blockChildNum - (worldDimensions - 1)
+                if (foundChunk.GetComponent<chunkDistanceCalc>().checkChild(blockChildNum - (worldDimensions - 1)) != 0)
+                {
+                    foundChunk.GetComponent<chunkDistanceCalc>().changeBlockState(blockChildNum - (worldDimensions - 1), 1);
+                }
+            }
+        }
+
+        //UnityEngine.Debug.Log(GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 2) + " bottom");
+        //bottom
+        if (blockChildNum % (worldDimensions * worldDimensions) < (worldDimensions * (worldDimensions - 1)))
+        {
+            //blockChildNum + worldDimensions
+            if (checkChild(blockChildNum + worldDimensions) != 0)
+            {
+                changeBlockState(blockChildNum + worldDimensions, 1);
+            }
+        }
+        //else if (foundChunk = retrieveChunkByPosition(chunkPos, 2))
+        //else if (foundChunk = transform.parent.transform.GetChild(GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 2)).gameObject)
+        //else if (transform.parent.transform.GetChild(GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 2)))
+        else if(GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 2) < transform.parent.childCount && GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 2) >= 0)
+        {
+            UnityEngine.Debug.Log("broke bottom of " + transform.GetSiblingIndex());
+            foundChunk = transform.parent.transform.GetChild(GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 2)).gameObject;
+            UnityEngine.Debug.Log("found " + foundChunk.transform.GetSiblingIndex());
+            //blockChildNum - (worldDimensions * (worldDimensions - 1))
+            if (foundChunk.GetComponent<chunkDistanceCalc>().checkChild(blockChildNum - (worldDimensions * (worldDimensions - 1))) != 0)
+            {
+                foundChunk.GetComponent<chunkDistanceCalc>().changeBlockState(blockChildNum - (worldDimensions * (worldDimensions - 1)), 1);
+            }
+        }
+
+        //UnityEngine.Debug.Log(GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 3) + " left");
+        //left
+        if ((blockChildNum) % worldDimensions != 0 && (blockChildNum - 1) >= 0)
+        {
+            //blockChildNum - 1
+            if (checkChild(blockChildNum - 1) != 0)
+            {
+                changeBlockState(blockChildNum - 1, 1);
+            }
+        }
+        //else if (foundChunk = retrieveChunkByPosition(chunkPos, 3))
+        //else if (foundChunk = transform.parent.transform.GetChild(GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 3)).gameObject)
+        //else if (transform.parent.transform.GetChild(GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 3)))
+        else if (GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 3) < transform.parent.childCount && GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 3) >= 0)
+        {
+            UnityEngine.Debug.Log("broke left of " + transform.GetSiblingIndex());
+            foundChunk = transform.parent.transform.GetChild(GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 3)).gameObject;
+            UnityEngine.Debug.Log("found " + foundChunk.transform.GetSiblingIndex());
+            if (foundChunk.transform.position.y == transform.position.y)
+            {
+                //blockChildNum + worldDimensions - 1
+                if (foundChunk.GetComponent<chunkDistanceCalc>().checkChild(blockChildNum + worldDimensions - 1) != 0)
+                {
+                    foundChunk.GetComponent<chunkDistanceCalc>().changeBlockState(blockChildNum + worldDimensions - 1, 1);
+                }
+            }
+        }
+
+        //UnityEngine.Debug.Log(GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 4) + " front");
+        //front
+        if (blockChildNum < (worldDimensions * worldDimensions * (worldDimensions - 1)))
+        {
+            //blockChildNum + (worldDimensions * worldDimensions)
+            if (checkChild(blockChildNum + (worldDimensions * worldDimensions)) != 0)
+            {
+                changeBlockState(blockChildNum + (worldDimensions * worldDimensions), 1);
+            }
+        }
+        //else if (foundChunk = retrieveChunkByPosition(chunkPos, 4))
+        //else if (foundChunk = transform.parent.transform.GetChild(GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 4)).gameObject)
+        //else if (transform.parent.transform.GetChild(GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 4)))
+        else if (GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 4) < transform.parent.childCount && GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 4) >= 0)
+        {
+            UnityEngine.Debug.Log("broke front of " + transform.GetSiblingIndex());
+            foundChunk = transform.parent.transform.GetChild(GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 4)).gameObject;
+            UnityEngine.Debug.Log("found " + foundChunk.transform.GetSiblingIndex());
+            if (foundChunk.transform.position.y == transform.position.y)
+            {
+                //blockChildNum - (worldDimensions * worldDimensions * (worldDimensions - 1))
+                if (foundChunk.GetComponent<chunkDistanceCalc>().checkChild(blockChildNum - (worldDimensions * worldDimensions * (worldDimensions - 1))) != 0)
+                {
+                    foundChunk.GetComponent<chunkDistanceCalc>().changeBlockState(blockChildNum - (worldDimensions * worldDimensions * (worldDimensions - 1)), 1);
+                }
+            }
+        }
+
+        //UnityEngine.Debug.Log(GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 5) + " back");
+        //back
+        if (blockChildNum >= (worldDimensions * worldDimensions))
+        {
+            //blockChildNum - (worldDimensions * worldDimensions)
+            if (checkChild(blockChildNum - (worldDimensions * worldDimensions)) != 0)
+            {
+                changeBlockState(blockChildNum - (worldDimensions * worldDimensions), 1);
+            }
+        }
+        //else if (foundChunk = retrieveChunkByPosition(chunkPos, 5))
+        //else if (foundChunk = transform.parent.transform.GetChild(GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 5)).gameObject)
+        //else if (transform.parent.transform.GetChild(GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 5)))
+        else if (GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 5) < transform.parent.childCount && GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 5) >= 0)
+        {
+            UnityEngine.Debug.Log("broke back of " + transform.GetSiblingIndex());
+            foundChunk = transform.parent.transform.GetChild(GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 5)).gameObject;
+            UnityEngine.Debug.Log("found " + foundChunk.transform.GetSiblingIndex());
+            if (foundChunk.transform.position.y == transform.position.y)
+            {
+                //blockChildNum + (worldDimensions * worldDimensions * (worldDimensions - 1))
+                if (foundChunk.GetComponent<chunkDistanceCalc>().checkChild(blockChildNum + (worldDimensions * worldDimensions * (worldDimensions - 1))) != 0)
+                {
+                    foundChunk.GetComponent<chunkDistanceCalc>().changeBlockState(blockChildNum + (worldDimensions * worldDimensions * (worldDimensions - 1)), 1);
+                }
+            }
+        }
     }
 
     private void checkAroundBlocks(int blockChildNum)

@@ -59,7 +59,7 @@ public class dynamicChunkBuilder : MonoBehaviour
         GameObject childBlockHolder = new GameObject("blockHolder");
         childBlockHolder.transform.parent = transform;
         childBlockHolder.transform.position = transform.position;
-        //childBlockHolder.SetActive(false);
+        childBlockHolder.SetActive(false);
         childBlockHolder.layer = 13;
 
         GameObject childSpawnedHolder = new GameObject("spawnedHolder");
@@ -80,7 +80,7 @@ public class dynamicChunkBuilder : MonoBehaviour
                     //yield return new WaitForFixedUpdate();
                     spawnLocation.x = xDimension + transform.position.x;
                     GameObject tempNewBlock = Instantiate(blockToSpawn, spawnLocation, transform.rotation, childBlockHolder.transform);
-                    //tempNewBlock.SetActive(false);
+                    tempNewBlock.SetActive(false);
                     tempNewBlock.name = blockName + "";
                     blockName++;
                 }
@@ -89,6 +89,6 @@ public class dynamicChunkBuilder : MonoBehaviour
 
         GetComponent<chunkDistanceCalc>().enabled = true;
         transform.parent.GetComponent<fixedWorldGen>().buildNewListChunkImproved(gameObject);
-        gameObject.SetActive(false);
+        //gameObject.SetActive(false);
     }
 }

@@ -71,7 +71,7 @@ public class BlockBreaking : MonoBehaviour
             GameObject.Find("blockTracker").GetComponent<blockManager>().addBlock(int.Parse(GetComponent<Renderer>().material.name.Split()[0]));
 
             //GameObject.Find("OriginPoint").GetComponent<fixedWorldGen>().breakChunkBlockByPosition2(transform.parent.transform.position, transform.GetSiblingIndex());
-            GameObject.Find("OriginPoint").GetComponent<fixedWorldGen>().breakChunkBlockRecursive(transform.parent.transform.position, transform.GetSiblingIndex());
+            //GameObject.Find("OriginPoint").GetComponent<fixedWorldGen>().breakChunkBlockRecursive(transform.parent.transform.position, transform.GetSiblingIndex());
         }
     }
 
@@ -87,7 +87,7 @@ public class BlockBreaking : MonoBehaviour
 
             //GetComponent<Renderer>().material.color = Color.black;
 
-            GameObject.Find("OriginPoint").GetComponent<fixedWorldGen>().breakChunkBlockRecursive(transform.parent.transform.position, transform.GetSiblingIndex());
+            //GameObject.Find("OriginPoint").GetComponent<fixedWorldGen>().breakChunkBlockRecursive(transform.parent.transform.position, transform.GetSiblingIndex());
             //breakBlocksAround(UnityEngine.Random.Range(1, worldDimensions-1));
             //breakBlocksAround(UnityEngine.Random.Range(1, squaredWorldDimensions));
             breakBlocksAround(UnityEngine.Random.Range(worldDimensions, squaredWorldDimensions));
@@ -144,7 +144,7 @@ public class BlockBreaking : MonoBehaviour
     {
         transform.parent.transform.parent.GetComponent<chunkDistanceCalc>().changeBlockState(transform.GetSiblingIndex(), 0);
 
-        GameObject.Find("OriginPoint").GetComponent<fixedWorldGen>().breakChunkBlockRecursive(transform.parent.transform.position, transform.GetSiblingIndex());
+        //GameObject.Find("OriginPoint").GetComponent<fixedWorldGen>().breakChunkBlockRecursive(transform.parent.transform.position, transform.GetSiblingIndex());
         //GameObject.Find("OriginPoint").GetComponent<fixedWorldGen>().breakChunkBlockByPosition2(transform.parent.transform.position, transform.GetSiblingIndex());
 
 

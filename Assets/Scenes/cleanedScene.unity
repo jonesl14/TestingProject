@@ -289,8 +289,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   worldDimensions: 3
-  depthCount: 1
-  loopsToPerform: 5
+  depthCount: 5
+  loopsToPerform: 3
   worldBlockTemplate: {fileID: 6156535683244668781, guid: 44d16bcc5134b9449922bdabc8c311ad,
     type: 3}
   worldBlockOriginPoint: {fileID: 154154714}
@@ -1102,7 +1102,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 11400000, guid: 5e9e851c0e142814dac026a256ba2ac0, type: 3}
       propertyPath: m_MouseLook.lockCursor
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 11400000, guid: 5e9e851c0e142814dac026a256ba2ac0, type: 3}
       propertyPath: m_UseFovKick

@@ -442,6 +442,9 @@ public class fixedWorldGen : MonoBehaviour
     //public GameObject centreRef;
 
     private int spawnOption = 0;
+    /// <summary>
+    /// Using option1 is now viable as the chunks spawn much faster
+    /// </summary>
 
     private void Update()
     {
@@ -668,6 +671,7 @@ public class fixedWorldGen : MonoBehaviour
 
     int oldLoopsToPerform = -1;
     bool resetChunkNum = true;
+    int tempStoreLoopsToPerform = 0;
     IEnumerator spawnSpiralChunks()
     {
         GameObject tempChunkHolder;
@@ -684,6 +688,9 @@ public class fixedWorldGen : MonoBehaviour
             chunkPosition.y += worldDimensions * depthCount;
         }*/
         chunkPosition = originVector;
+
+        startTime = System.DateTime.Now;
+
         for (int epochCount = 0; epochCount <= depthCount; epochCount++)
         {
             while (loopsPerformed < loopsToPerform)
@@ -700,24 +707,14 @@ public class fixedWorldGen : MonoBehaviour
                         tempLoopsPerformed--;
                     }
 
-
-                    /*chunkPosition.z -= worldDimensions;
-                    if (loopsPerformed > 1)
-                    {
-                        chunkPosition.z -= worldDimensions;
-                    }*/
-                    //if(depthCount > 0 && oldLoopsToPerform != -1 && !resetChunkNum)
                     if(!resetChunkNum)
                     {
                         resetChunkNum = true;
-                        //tempBlockNumbers = transform.childCount / 2;
                         tempBlockNumbers = (int)(4 * Mathf.Pow(loopsToPerform-1, 2) - 4 * (loopsToPerform-1) + 1);
-                        //UnityEngine.Debug.Log((transform.childCount / 2) + "____" + (4 * Mathf.Pow(loopsToPerform, 2) - 4 * (loopsToPerform) + 1));
                     }
                     if(resetChunkNum && tempBlockNumbers == (int)(4 * Mathf.Pow(loopsToPerform, 2) - 4 * (loopsToPerform) + 1))
                     {
-                        //The number being added to loopsToPerform will likely need to be based on how many loops have been completed or need to be done.
-                        tempBlockNumbers = (int)(4 * Mathf.Pow(loopsToPerform + 2, 2) - 4 * (loopsToPerform + 2) + 1);
+                        tempBlockNumbers = (int)(4 * Mathf.Pow(loopsToPerform, 2) - 4 * (loopsToPerform) +1) + (int)(4 * Mathf.Pow(loopsToPerform-1, 2) - 4 * (loopsToPerform-1) +1);
                     }
 
                     tempChunkHolder = Instantiate(chunkToGen, chunkPosition, transform.rotation, worldBlockOriginPoint.transform);//This will make the down-right diagonal
@@ -796,20 +793,34 @@ public class fixedWorldGen : MonoBehaviour
             {
                 if (oldLoopsToPerform == -1)
                 {
+                    tempLoopsPerformed = loopsPerformed;
                     loopsPerformed = 0;
                 }
                 else
                 {
                     loopsPerformed = oldLoopsToPerform;
                 }
-                chunkPosition = originVector;
-                chunkPosition.y -= worldDimensions;
+                //chunkPosition = originVector;
+                chunkPosition.x = originVector.x;
+                chunkPosition.z = originVector.z;
+                chunkPosition.y -= worldDimensions + (worldDimensions * epochCount);
             }
-            oldLoopsToPerform = loopsToPerform;
+            
         }
+        ///Figure out how to correctly generate more chunks outwards(x and z) while also building matching ones down(y)
+        ///
+
+        oldLoopsToPerform = tempLoopsPerformed;
+        loopsPerformed = tempLoopsPerformed;
+        //loopsToPerform = tempLoopsPerformed;
+        endTime = System.DateTime.Now;
+        UnityEngine.Debug.Log(transform.childCount * (worldDimensions * worldDimensions * worldDimensions));
+
+        System.TimeSpan timeTaken = endTime - startTime;
+        UnityEngine.Debug.Log(timeTaken.TotalSeconds);
     }
 
-    private int findChunkLoopNum(int nameNum, int direction)
+    public int findChunkLoopNum(int nameNum, int direction)
     {
         //For adding new chunks to the parent use trasform.SetSiblingIndex(x);
         //For handling depth, use (4n^2 - 4n +1) where n=numOfLoops-1
@@ -823,10 +834,12 @@ public class fixedWorldGen : MonoBehaviour
             int downRight = (int)(1 - 4 * i + 4 * Mathf.Pow(i, 2));
             int downRightPlusOne = (int)(1 - 4 * (i+1) + 4 * Mathf.Pow((i + 1), 2));
 
-            aboveChunk = (int)(nameNum - (4 * Mathf.Pow(loopsToPerform - 1, 2) - 4 * (loopsToPerform-1) + 1));
-            belowChunk = (int)(nameNum + (4 * Mathf.Pow(loopsToPerform, 2) - 4 * (loopsToPerform) + 1));
-            if(nameNum == 8)
-            UnityEngine.Debug.Log(aboveChunk + "___" + belowChunk);
+            //aboveChunk = (int)(nameNum - (4 * Mathf.Pow(loopsToPerform - 1, 2) - 4 * (loopsToPerform-1) + 1));
+            //belowChunk = (int)(nameNum + (4 * Mathf.Pow(loopsToPerform, 2) - 4 * (loopsToPerform) + 1));
+            aboveChunk = nameNum - ((int)(4 * Mathf.Pow(loopsToPerform, 2) - 4 * (loopsToPerform) + 1) + (int)(4 * Mathf.Pow(loopsToPerform - 1, 2) - 4 * (loopsToPerform - 1) + 1));
+            belowChunk = nameNum + ((int)(4 * Mathf.Pow(loopsToPerform, 2) - 4 * (loopsToPerform) + 1));// + (int)(4 * Mathf.Pow(loopsToPerform - 1, 2) - 4 * (loopsToPerform - 1)));
+            //if (nameNum == 8)
+            //UnityEngine.Debug.Log(aboveChunk + "___" + belowChunk);
 
             if (nameNum == 0)
             {
@@ -843,7 +856,7 @@ public class fixedWorldGen : MonoBehaviour
                 leftChunk = nameNum + 11 + (8 * (i - 1));
                 rightChunk = nameNum + 1;
                 //fifth column(T)
-                UnityEngine.Debug.Log("upLeft" + nameNum + "\t\t" + upChunk + "upChunk\t" + downChunk + "downChunk\t" + leftChunk + "leftChunk\t" + rightChunk + "rightChunk\t");
+                //UnityEngine.Debug.Log("upLeft" + nameNum + "\t\t" + upChunk + "upChunk\t" + downChunk + "downChunk\t" + leftChunk + "leftChunk\t" + rightChunk + "rightChunk\t");
             }
             if (nameNum == upRight)
             {
@@ -852,7 +865,7 @@ public class fixedWorldGen : MonoBehaviour
                 leftChunk = nameNum - 1;
                 rightChunk = nameNum + 15 + (8 * (i - 1));
                 //sixth column(U)
-                UnityEngine.Debug.Log("upRight" + nameNum + "\t\t" + upChunk + "upChunk\t" + downChunk + "downChunk\t" + leftChunk + "leftChunk\t" + rightChunk + "rightChunk\t");
+                //UnityEngine.Debug.Log("upRight" + nameNum + "\t\t" + upChunk + "upChunk\t" + downChunk + "downChunk\t" + leftChunk + "leftChunk\t" + rightChunk + "rightChunk\t");
             }
             if(nameNum == downLeft)
             {
@@ -861,7 +874,7 @@ public class fixedWorldGen : MonoBehaviour
                 leftChunk = nameNum + 11 + (8 * (i - 1));
                 rightChunk = nameNum - 1;
                 //seventh column(V)
-                UnityEngine.Debug.Log("downLeft" + nameNum + "\t\t" + upChunk + "upChunk\t" + downChunk + "downChunk\t" + leftChunk + "leftChunk\t" + rightChunk + "rightChunk\t");
+                //UnityEngine.Debug.Log("downLeft" + nameNum + "\t\t" + upChunk + "upChunk\t" + downChunk + "downChunk\t" + leftChunk + "leftChunk\t" + rightChunk + "rightChunk\t");
             }
             if (nameNum == downRight)
             {
@@ -878,7 +891,7 @@ public class fixedWorldGen : MonoBehaviour
                 downChunk = nameNum + 9 + (8 * (i - 1));
                 leftChunk = nameNum + 1;
                 //eighth column(W)
-                UnityEngine.Debug.Log("downRight" + nameNum + "\t\t" + upChunk + "upChunk\t" + downChunk + "downChunk\t" + leftChunk + "leftChunk\t" + rightChunk + "rightChunk\t");
+                //UnityEngine.Debug.Log("downRight" + nameNum + "\t\t" + upChunk + "upChunk\t" + downChunk + "downChunk\t" + leftChunk + "leftChunk\t" + rightChunk + "rightChunk\t");
             }
 
 
@@ -892,7 +905,7 @@ public class fixedWorldGen : MonoBehaviour
                 leftChunk = nameNum - 1;
                 rightChunk = nameNum + 1;
                 //first column(P)
-                UnityEngine.Debug.Log("column P" + nameNum + "\t\t" + upChunk + "upChunk\t" + downChunk + "downChunk\t" + leftChunk + "leftChunk\t" + rightChunk + "rightChunk\t");
+                //UnityEngine.Debug.Log("column P" + nameNum + "\t\t" + upChunk + "upChunk\t" + downChunk + "downChunk\t" + leftChunk + "leftChunk\t" + rightChunk + "rightChunk\t");
             }
             if(nameNum < upLeft && nameNum > downLeft)//Left side
             {
@@ -903,14 +916,14 @@ public class fixedWorldGen : MonoBehaviour
                 if (i == 1)
                     rightChunk -= 1;
                 //second column(Q)
-                UnityEngine.Debug.Log("column Q" + nameNum + "\t\t" + upChunk + "upChunk\t" + downChunk + "downChunk\t" + leftChunk + "leftChunk\t" + rightChunk + "rightChunk\t");
+                //UnityEngine.Debug.Log("column Q" + nameNum + "\t\t" + upChunk + "upChunk\t" + downChunk + "downChunk\t" + leftChunk + "leftChunk\t" + rightChunk + "rightChunk\t");
             }
             if (nameNum > upRight && nameNum < downRightPlusOne)//Right side
             {//Will require extra work
                 upChunk = nameNum - 1;
                 if (nameNum + 1 == (int)(1 - 4 * (i + 1) + 4 * Mathf.Pow((i + 1), 2)))
                 {
-                    UnityEngine.Debug.Log(i);
+                    //UnityEngine.Debug.Log(i + "****************************************************************");
                     downChunk = downRight;
                     leftChunk = nameNum - (7 + (8*(i-2)))  - (8 * i);
                     if (i == 1)
@@ -918,12 +931,13 @@ public class fixedWorldGen : MonoBehaviour
                 }
                 else
                 {
+                    //UnityEngine.Debug.Log(i + "****************************************************************2");
                     downChunk = nameNum + 1;
                     leftChunk = nameNum - 15 - (8 * (i - 2));
                 }
                 rightChunk = nameNum + 15 + (8 * (i - 1));
                 //third column(R)
-                UnityEngine.Debug.Log("column R" + nameNum + "\t\t" + upChunk + "upChunk\t" + downChunk + "downChunk\t" + leftChunk + "leftChunk\t" + rightChunk + "rightChunk\t");
+                //UnityEngine.Debug.Log("column R" + nameNum + "\t\t" + upChunk + "upChunk\t" + downChunk + "downChunk\t" + leftChunk + "leftChunk\t" + rightChunk + "rightChunk\t");
             }
             if (nameNum < downLeft && nameNum > downRight)//Bottom side
             {
@@ -934,7 +948,7 @@ public class fixedWorldGen : MonoBehaviour
                 leftChunk = nameNum + 1;
                 rightChunk = nameNum - 1;
                 //fourth column(S)
-                UnityEngine.Debug.Log("column S" + nameNum + "\t\t" + upChunk + "upChunk\t" + downChunk + "downChunk\t" + leftChunk + "leftChunk\t" + rightChunk + "rightChunk\t");
+                //UnityEngine.Debug.Log("column S" + nameNum + "\t\t" + upChunk + "upChunk\t" + downChunk + "downChunk\t" + leftChunk + "leftChunk\t" + rightChunk + "rightChunk\t");
             }
 
             //UnityEngine.Debug.Log(upLeft + "upLeft\t" + upRight + "upRight\t" + downLeft + "downLeft\t" + downRight + "downRight");
@@ -944,12 +958,16 @@ public class fixedWorldGen : MonoBehaviour
         {
             case 0://top
                 //calculate top chunk
+                if (aboveChunk != -99)
+                    return aboveChunk;
                 break;
             case 1://right
                 if (rightChunk != -99)
                     return rightChunk;
                 break;
             case 2://bottom
+                if (belowChunk != -99)
+                    return belowChunk;
                 //calculate bottom chunk
                 break;
             case 3://left
@@ -965,6 +983,7 @@ public class fixedWorldGen : MonoBehaviour
                     return downChunk;
                 break;
         }
+        //UnityEngine.Debug.Log(nameNum);
         return -99;//desired direction wasn't found
     }
 
