@@ -288,9 +288,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a508c995431561f41beac7f054a3fbe9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  worldDimensions: 3
+  worldDimensions: 5
   depthCount: 5
-  loopsToPerform: 3
+  loopsToPerform: 10
   worldBlockTemplate: {fileID: 6156535683244668781, guid: 44d16bcc5134b9449922bdabc8c311ad,
     type: 3}
   worldBlockOriginPoint: {fileID: 154154714}
@@ -336,7 +336,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!108 &170076734
 Light:
   m_ObjectHideFlags: 0
@@ -1273,7 +1273,12 @@ PrefabInstance:
     - target: {fileID: 4807084421131477035, guid: 223020b9106d15041b7da46ab8c9cad7,
         type: 3}
       propertyPath: m_Range
-      value: 57
+      value: 7
+      objectReference: {fileID: 0}
+    - target: {fileID: 4807084421131477035, guid: 223020b9106d15041b7da46ab8c9cad7,
+        type: 3}
+      propertyPath: m_Lightmapping
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7777759662937141909, guid: 223020b9106d15041b7da46ab8c9cad7,
         type: 3}
