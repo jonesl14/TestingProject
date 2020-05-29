@@ -3,16 +3,19 @@ using UnityEngine;
 
 public class BlockBreaking : MonoBehaviour
 {
-    public bool activeBlock = true;
+    //public bool activeBlock = true;
     private int blockHealth = 1;
     private bool beingBroken = false;
     private int worldDimensions, squaredWorldDimensions, cubedWorldDimensions;
 
     private void Awake()
     {
-        worldDimensions = GameObject.Find("OriginPoint").GetComponent<fixedWorldGen>().worldDimensions;
-        squaredWorldDimensions = worldDimensions * worldDimensions;
-        cubedWorldDimensions = worldDimensions * worldDimensions * worldDimensions;
+        if (GetComponentInParent<chunkDistanceCalc>())
+        {
+            worldDimensions = GetComponentInParent<chunkDistanceCalc>().worldDimensions;
+            squaredWorldDimensions = worldDimensions * worldDimensions;
+            cubedWorldDimensions = worldDimensions * worldDimensions * worldDimensions;
+        }
     }
 
 
@@ -39,6 +42,7 @@ public class BlockBreaking : MonoBehaviour
 
     }
 
+    //remove the Find() calls
     public void killBlock()
     {
         if (!beingBroken)
@@ -49,12 +53,6 @@ public class BlockBreaking : MonoBehaviour
         {
             if(gameObject.layer == 16)
             {
-                /*if (transform.parent.GetSiblingIndex() == 0)
-                {
-                    transform.parent.transform.parent.GetComponent<chunkDistanceCalc>().changeBlockState(transform.GetSiblingIndex(), 0);
-                }*/
-                //UnityEngine.Debug.Log(gameObject.transform.position + " position");
-                //UnityEngine.Debug.Log(gameObject.transform.localPosition + " localPosition");
                 Destroy(gameObject);
                 GameObject.Find("blockTracker").GetComponent<blockManager>().addBlock(int.Parse(GetComponent<Renderer>().material.name.Split()[0]));
                 return;
@@ -63,35 +61,20 @@ public class BlockBreaking : MonoBehaviour
             {
                 transform.parent.transform.parent.GetComponent<chunkDistanceCalc>().changeBlockState(transform.GetSiblingIndex(), 0);
             }
-            //UnityEngine.Debug.Log(gameObject.transform.position + " position");
-            //UnityEngine.Debug.Log(gameObject.transform.localPosition + " localPosition");
             gameObject.SetActive(false);
-            activeBlock = false;
+            //activeBlock = false;
 
             GameObject.Find("blockTracker").GetComponent<blockManager>().addBlock(int.Parse(GetComponent<Renderer>().material.name.Split()[0]));
-
-            //GameObject.Find("OriginPoint").GetComponent<fixedWorldGen>().breakChunkBlockByPosition2(transform.parent.transform.position, transform.GetSiblingIndex());
-            //GameObject.Find("OriginPoint").GetComponent<fixedWorldGen>().breakChunkBlockRecursive(transform.parent.transform.position, transform.GetSiblingIndex());
         }
     }
 
     public void instaKillBlock()
     {
-        worldDimensions = GameObject.Find("OriginPoint").GetComponent<fixedWorldGen>().worldDimensions;
+        //change this to a value that can be set and changed
         if(transform.position.y < -3)
         {
             transform.parent.transform.parent.GetComponent<chunkDistanceCalc>().changeBlockState(transform.GetSiblingIndex(), 0);
-
-            //gameObject.SetActive(false);
-            //activeBlock = false;
-
-            //GetComponent<Renderer>().material.color = Color.black;
-
-            //GameObject.Find("OriginPoint").GetComponent<fixedWorldGen>().breakChunkBlockRecursive(transform.parent.transform.position, transform.GetSiblingIndex());
-            //breakBlocksAround(UnityEngine.Random.Range(1, worldDimensions-1));
-            //breakBlocksAround(UnityEngine.Random.Range(1, squaredWorldDimensions));
             breakBlocksAround(UnityEngine.Random.Range(worldDimensions, squaredWorldDimensions));
-
         }
     }
 
@@ -143,14 +126,5 @@ public class BlockBreaking : MonoBehaviour
     public void instaKillBlock2()
     {
         transform.parent.transform.parent.GetComponent<chunkDistanceCalc>().changeBlockState(transform.GetSiblingIndex(), 0);
-
-        //GameObject.Find("OriginPoint").GetComponent<fixedWorldGen>().breakChunkBlockRecursive(transform.parent.transform.position, transform.GetSiblingIndex());
-        //GameObject.Find("OriginPoint").GetComponent<fixedWorldGen>().breakChunkBlockByPosition2(transform.parent.transform.position, transform.GetSiblingIndex());
-
-
-        //GetComponent<Renderer>().material.color = Color.black;
-        gameObject.SetActive(false);
-        activeBlock = false;
     }
-    
 }

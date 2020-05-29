@@ -9,7 +9,6 @@ public class PassiveCreatureAI2 : MonoBehaviour
     public bool doneMoving = true;
     public bool runningCreatureRotation = false;
     public bool stuckOnTerrarin = false;
-    private float groundedCreatureHeight = -999f;
 
     private IEnumerator /*rotateRoutine,*/ walkRoutine;
     Vector3 creatureVelocity;
@@ -39,7 +38,6 @@ public class PassiveCreatureAI2 : MonoBehaviour
     }
 
     bool moving = false;
-    bool needToFall = false;
     private Quaternion newRandomCreatureRotation;
     private void Update()
     {
