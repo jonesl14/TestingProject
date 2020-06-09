@@ -18,6 +18,7 @@ public class fixedWorldGen : MonoBehaviour
     public float originX, originY, originZ;
     private Vector3 originVector;
     public GameObject playerRef;
+    public GameObject fpsControllerRef;
 
     Vector3 chunkPosition;
 
@@ -64,7 +65,7 @@ public class fixedWorldGen : MonoBehaviour
                 }
             }
         }
-        StartCoroutine(spawnSpiralChunks());        
+        StartCoroutine(spawnSpiralChunks());
     }
 
     public void buildNewListChunkImproved(GameObject originParent)//, string genDirection)
@@ -125,6 +126,7 @@ public class fixedWorldGen : MonoBehaviour
         }
     }
 
+
     int loopsPerformed = 0;
     int tempLoopsPerformed = 0;
 
@@ -134,7 +136,7 @@ public class fixedWorldGen : MonoBehaviour
     int tempStoreLoopsPerformed = 0;
     IEnumerator spawnSpiralChunks()
     {
-        GameObject tempChunkHolder;
+        //GameObject tempChunkHolder;
         chunkPosition = originVector;
 
         startTime = System.DateTime.Now;
@@ -142,10 +144,15 @@ public class fixedWorldGen : MonoBehaviour
 
         for (int epochCount = 0; epochCount <= depthCount; epochCount++)
         {
+            if (!resetChunkNum)
+            {
+                int chunkDifference = ((int)(4 * Mathf.Pow(loopsToPerform, 2) - 4 * (loopsToPerform) + 1)) - ((int)(4 * Mathf.Pow(loopsToPerform - 1, 2) - 4 * (loopsToPerform - 1) + 1));
+                tempBlockNumbers = (int)(4 * Mathf.Pow(loopsToPerform - 1, 2) - 4 * (loopsToPerform - 1) + 1) + ((int)(4 * Mathf.Pow(loopsToPerform - 1, 2) - 4 * (loopsToPerform - 1) + 1) * epochCount) + (chunkDifference * epochCount);
+            }
             while (loopsPerformed < loopsToPerform)
             {
                 chunkPosition.z = originVector.z;
-                yield return new WaitForFixedUpdate();
+                //yield return new WaitForFixedUpdate();
                 if (loopsPerformed > 0)
                 {
                     tempLoopsPerformed = loopsPerformed;
@@ -156,21 +163,19 @@ public class fixedWorldGen : MonoBehaviour
                         tempLoopsPerformed--;
                     }
 
-                    if(!resetChunkNum)
-                    {
-                        int chunkDifference = ((int)(4 * Mathf.Pow(loopsToPerform, 2) - 4 * (loopsToPerform) + 1)) - ((int)(4 * Mathf.Pow(loopsToPerform - 1, 2) - 4 * (loopsToPerform - 1) + 1));
-                        tempBlockNumbers = (int)(4 * Mathf.Pow(loopsToPerform-1, 2) - 4 * (loopsToPerform-1) + 1) + ((int)(4 * Mathf.Pow(loopsToPerform - 1, 2) - 4 * (loopsToPerform - 1) + 1) * epochCount) + (chunkDifference*epochCount);
-                    }
-                    tempChunkHolder = Instantiate(chunkToGen, chunkPosition, transform.rotation, worldBlockOriginPoint.transform);//This will make the down-right diagonal
-                    tempChunkHolder.transform.SetSiblingIndex(tempBlockNumbers);
+                    
+                    //tempChunkHolder = Instantiate(chunkToGen, chunkPosition, transform.rotation, transform);//This will make the down-right diagonal
+                    //tempChunkHolder.transform.SetSiblingIndex(tempBlockNumbers);
+                    Instantiate(chunkToGen, chunkPosition, transform.rotation, transform).transform.SetSiblingIndex(tempBlockNumbers);
                     tempBlockNumbers++;
 
                     tempLoopsPerformed = loopsPerformed * 2;
                     while (tempLoopsPerformed > 0)
                     {
                         chunkPosition.x -= worldDimensions;//move left 1 spot then * number of loops
-                        tempChunkHolder = Instantiate(chunkToGen, chunkPosition, transform.rotation, worldBlockOriginPoint.transform);
-                        tempChunkHolder.transform.SetSiblingIndex(tempBlockNumbers);
+                        //tempChunkHolder = Instantiate(chunkToGen, chunkPosition, transform.rotation, transform);
+                        //tempChunkHolder.transform.SetSiblingIndex(tempBlockNumbers);
+                        Instantiate(chunkToGen, chunkPosition, transform.rotation, transform).transform.SetSiblingIndex(tempBlockNumbers);
                         tempBlockNumbers++;
                         tempLoopsPerformed--;
                     }
@@ -179,8 +184,9 @@ public class fixedWorldGen : MonoBehaviour
                     while (tempLoopsPerformed > 0)
                     {
                         chunkPosition.z += worldDimensions;//move up 1 spot then * number of loops
-                        tempChunkHolder = Instantiate(chunkToGen, chunkPosition, transform.rotation, worldBlockOriginPoint.transform);
-                        tempChunkHolder.transform.SetSiblingIndex(tempBlockNumbers);
+                        //tempChunkHolder = Instantiate(chunkToGen, chunkPosition, transform.rotation, transform);
+                        //tempChunkHolder.transform.SetSiblingIndex(tempBlockNumbers);
+                        Instantiate(chunkToGen, chunkPosition, transform.rotation, transform).transform.SetSiblingIndex(tempBlockNumbers);
                         tempBlockNumbers++;
                         tempLoopsPerformed--;
                     }
@@ -189,8 +195,9 @@ public class fixedWorldGen : MonoBehaviour
                     while (tempLoopsPerformed > 0)
                     {
                         chunkPosition.x += worldDimensions;//move right 1 spot then * number of loops
-                        tempChunkHolder = Instantiate(chunkToGen, chunkPosition, transform.rotation, worldBlockOriginPoint.transform);
-                        tempChunkHolder.transform.SetSiblingIndex(tempBlockNumbers);
+                        //tempChunkHolder = Instantiate(chunkToGen, chunkPosition, transform.rotation, transform);
+                        //tempChunkHolder.transform.SetSiblingIndex(tempBlockNumbers);
+                        Instantiate(chunkToGen, chunkPosition, transform.rotation, transform).transform.SetSiblingIndex(tempBlockNumbers);
                         tempBlockNumbers++;
                         tempLoopsPerformed--;
                     }
@@ -199,8 +206,9 @@ public class fixedWorldGen : MonoBehaviour
                     while (tempLoopsPerformed > 0)
                     {
                         chunkPosition.z -= worldDimensions;//move down * number of loops
-                        tempChunkHolder = Instantiate(chunkToGen, chunkPosition, transform.rotation, worldBlockOriginPoint.transform);
-                        tempChunkHolder.transform.SetSiblingIndex(tempBlockNumbers);
+                        //tempChunkHolder = Instantiate(chunkToGen, chunkPosition, transform.rotation, transform);
+                        //tempChunkHolder.transform.SetSiblingIndex(tempBlockNumbers);
+                        Instantiate(chunkToGen, chunkPosition, transform.rotation, transform).transform.SetSiblingIndex(tempBlockNumbers);
                         tempBlockNumbers++;
                         tempLoopsPerformed--;
                     }
@@ -214,8 +222,9 @@ public class fixedWorldGen : MonoBehaviour
                 }
                 if (loopsPerformed == 0)
                 {
-                    tempChunkHolder = Instantiate(chunkToGen, chunkPosition, transform.rotation, worldBlockOriginPoint.transform);
-                    tempChunkHolder.transform.SetSiblingIndex(tempBlockNumbers);
+                    //tempChunkHolder = Instantiate(chunkToGen, chunkPosition, transform.rotation, transform);
+                    //tempChunkHolder.transform.SetSiblingIndex(tempBlockNumbers);
+                    Instantiate(chunkToGen, chunkPosition, transform.rotation, transform).transform.SetSiblingIndex(tempBlockNumbers);
                     tempBlockNumbers++;
                 }
                 loopsPerformed++;
@@ -235,10 +244,16 @@ public class fixedWorldGen : MonoBehaviour
         }
         loopsPerformed = loopsToPerform;
         endTime = System.DateTime.Now;
-        UnityEngine.Debug.Log(transform.childCount * (worldDimensions * worldDimensions * worldDimensions));
+        UnityEngine.Debug.Log(transform.childCount * (worldDimensions * worldDimensions * worldDimensions) + "_____" + transform.childCount);
 
         System.TimeSpan timeTaken = endTime - startTime;
         UnityEngine.Debug.Log(timeTaken.TotalSeconds);
+
+        yield return new WaitForSeconds(1);
+        foreach(Transform childTransform in transform)
+        {
+            childTransform.gameObject.GetComponent<chunkDistanceCalc>().breakBlocks();
+        }
     }
 
     public int findChunkLoopNum(int nameNum, int direction)
@@ -302,7 +317,7 @@ public class fixedWorldGen : MonoBehaviour
             {
                 if(nameNum == 1)
                 {
-                    upChunk = nameNum + 8;
+                    upChunk = nameNum + 7;//8;
                     rightChunk = nameNum + 15 + (8 * (i));
                 }
                 else

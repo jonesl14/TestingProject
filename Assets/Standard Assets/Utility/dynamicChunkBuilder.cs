@@ -30,7 +30,7 @@ public class dynamicChunkBuilder : MonoBehaviour
         childSpawnedHolder.layer = 13;
         childSpawnedHolder.SetActive(false);
 
-        for (int zDimension = 0; zDimension < chunkDimensions; zDimension++)
+        /*for (int zDimension = 0; zDimension < chunkDimensions; zDimension++)
         {
             spawnLocation.z = zDimension + transform.position.z;
             for (int yDimension = 0; yDimension > -chunkDimensions; yDimension--)
@@ -39,8 +39,27 @@ public class dynamicChunkBuilder : MonoBehaviour
                 for (int xDimension = 0; xDimension < chunkDimensions; xDimension++)
                 {
                     spawnLocation.x = xDimension + transform.position.x;
+                    //GameObject tempNewBlock = Instantiate(blockToSpawn, spawnLocation, transform.rotation, childBlockHolder.transform);
+                    Instantiate(blockToSpawn, spawnLocation, transform.rotation, childBlockHolder.transform).SetActive(false);
+                    //tempNewBlock.SetActive(false);
+                    blockName++;
+                }
+            }
+        }*/
+
+        for (int yDimension = 0; yDimension > -chunkDimensions; yDimension--)
+        {
+            spawnLocation.y = yDimension + transform.position.y;
+            for (int zDimension = 0; zDimension > -chunkDimensions; zDimension--)
+            {
+                spawnLocation.z = zDimension + transform.position.z;
+                for (int xDimension = 0; xDimension < chunkDimensions; xDimension++)
+                {
+                    spawnLocation.x = xDimension + transform.position.x;
                     GameObject tempNewBlock = Instantiate(blockToSpawn, spawnLocation, transform.rotation, childBlockHolder.transform);
+                    //Instantiate(blockToSpawn, spawnLocation, transform.rotation, childBlockHolder.transform).SetActive(false);
                     tempNewBlock.SetActive(false);
+                    tempNewBlock.name = blockName + "";
                     blockName++;
                 }
             }

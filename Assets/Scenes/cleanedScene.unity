@@ -289,8 +289,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   worldDimensions: 5
-  depthCount: 5
-  loopsToPerform: 10
+  depthCount: 1
+  loopsToPerform: 2
+  numOfBlocksToBreak: 0
   worldBlockTemplate: {fileID: 6156535683244668781, guid: 44d16bcc5134b9449922bdabc8c311ad,
     type: 3}
   worldBlockOriginPoint: {fileID: 154154714}
@@ -298,6 +299,7 @@ MonoBehaviour:
   originY: 0
   originZ: 0
   playerRef: {fileID: 891100144}
+  fpsControllerRef: {fileID: 330059303}
   chunkToGen: {fileID: 8039943292976576666, guid: 2f331bcb8e73eea40b033144490487f0,
     type: 3}
 --- !u!114 &154154717
@@ -313,7 +315,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   numberRange: 10
-  numberOfMobsToSpawn: 1
+  numberOfMobsToSpawn: 0
   objectsToSpawn:
   - {fileID: 7895588141126901309, guid: 40b6e56143e176a46aa1a136c5a0c79b, type: 3}
   - {fileID: 9181306021311939737, guid: 19e4227fb17d0a84fb563f5b9fa1e90a, type: 3}
@@ -562,20 +564,6 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 1064553552}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &330059311
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 330059303}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f949ea9751b68d145879845028713115, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  originPointChunkHolder: {fileID: 154154714}
-  chunkRoundedPlayerPos: {x: 0, y: 0, z: 0}
 --- !u!135 &330059312
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -1126,7 +1114,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 14300000, guid: 5e9e851c0e142814dac026a256ba2ac0, type: 3}
       propertyPath: m_Height
-      value: 3
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 14300000, guid: 5e9e851c0e142814dac026a256ba2ac0, type: 3}
       propertyPath: m_MinMoveDistance
@@ -1702,7 +1690,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1903569335}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.5, y: 0, z: 4.81}
+  m_LocalPosition: {x: 0.5, y: 0, z: 3}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 2010663576}
@@ -2138,7 +2126,6 @@ MonoBehaviour:
   collidersNotClearing: []
   noBlockMat: {fileID: 2100000, guid: a0d1429a4a6f79c44836bdb6709814d8, type: 2}
   placingBlockMaterial: 1
-  blockFound: 0
 --- !u!114 &6156535682537703642
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2151,7 +2138,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 618b2082fa12c5843853e28e55748422, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  activeBlock: 1
 --- !u!54 &6156535682537703643
 Rigidbody:
   m_ObjectHideFlags: 0

@@ -3,13 +3,17 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
+/// <summary>
+/// Break blocks once all the chunks have been created. Pick random chunk and random block num then break around that. Repeat
+/// </summary>
 public class chunkDistanceCalc : MonoBehaviour
 {
-    int viewDistanceControl = 30;
-    private GameObject playerRef;
+    int viewDistanceControl = 50;
+    private GameObject playerRef, fpsControllerRef;
     public int worldDimensions, squaredWorldDimensions, cubedWorldDimensions;
     private bool showing = true, showingClose = false;
-    public Dictionary<string, List<int>> outsideBrokenBlocks = new Dictionary<string, List<int>>();
+    //public Dictionary<string, List<int>> outsideBrokenBlocks = new Dictionary<string, List<int>>();
+    public List<int> topBrokenBlocks, rightBrokenBlocks, bottomBrokenBlocks, leftBrokenBlocks, frontBrokenBlocks, backBrokenBlocks;
 
     int numberOfBlocksToBreak = 0;
 
@@ -32,24 +36,50 @@ public class chunkDistanceCalc : MonoBehaviour
 
     private void Start()
     {
-        outsideBrokenBlocks.Add("top", new List<int>());
-        outsideBrokenBlocks.Add("right", new List<int>());
-        outsideBrokenBlocks.Add("bottom", new List<int>());
-        outsideBrokenBlocks.Add("left", new List<int>());
-        outsideBrokenBlocks.Add("front", new List<int>());
-        outsideBrokenBlocks.Add("back", new List<int>());
+        /*outsideBrokenBlocks.Add("top", new List<int>());//top
+        outsideBrokenBlocks.Add("right", new List<int>());//right
+        outsideBrokenBlocks.Add("bottom", new List<int>());//bottom
+        outsideBrokenBlocks.Add("left", new List<int>());//left
+        outsideBrokenBlocks.Add("front", new List<int>());//front
+        outsideBrokenBlocks.Add("back", new List<int>());//back*/
 
-        playerRef = GameObject.Find("FPSController");
+        playerRef = GetComponentInParent<fixedWorldGen>().playerRef;// GameObject.Find("FPSController");
+        fpsControllerRef = GetComponentInParent<fixedWorldGen>().fpsControllerRef;
 
-        for (int epochCount = 0; epochCount < numberOfBlocksToBreak; epochCount++)
+
+        /*for (int epochCount = 0; epochCount < numberOfBlocksToBreak; epochCount++)
         {
             transform.GetChild(0).transform.GetChild(UnityEngine.Random.Range(0, cubedWorldDimensions)).GetComponent<BlockBreaking>().instaKillBlock();
-        }
+        }*/
         StartCoroutine(determineBlockStates());
 
-        StartCoroutine(checkIfShouldShow());
+
+
+        //StartCoroutine(checkIfShouldShow());
+        //StartCoroutine(checkIfShouldShowRotation());
+        StartCoroutine(checkIFShouldShowAngle());
 
         StartCoroutine(checkSurroundingChunks());
+
+        /*for (int childBlockIndex = 0; childBlockIndex < exposedBlocks.Length; childBlockIndex++)
+        {
+            if (exposedBlocks[childBlockIndex] == 1)// || exposedBlocks[childBlockIndex] == 2)
+            {
+                transform.GetChild(0).transform.GetChild(childBlockIndex).gameObject.SetActive(true);
+            }
+            else
+            {
+                transform.GetChild(0).transform.GetChild(childBlockIndex).gameObject.SetActive(false);
+            }
+        }*/
+    }
+
+    public void breakBlocks()
+    {
+        for (int epochCount = 0; epochCount < numberOfBlocksToBreak; epochCount++)
+        {
+            transform.GetChild(0).transform.GetChild(UnityEngine.Random.Range(0, cubedWorldDimensions-1)).GetComponent<BlockBreaking>().instaKillBlock();
+        }
     }
 
     private IEnumerator determineBlockStates()
@@ -65,27 +95,33 @@ public class chunkDistanceCalc : MonoBehaviour
             {
                 if (!(blockIndex % (worldDimensions * worldDimensions) >= worldDimensions))
                 {
-                    outsideBrokenBlocks["top"].Add(blockIndex);
+                    //outsideBrokenBlocks["top"].Add(blockIndex);
+                    topBrokenBlocks.Add(blockIndex);
                 }
                 if (!((blockIndex + 1) % worldDimensions != 0 || blockIndex == 0))
                 {
-                    outsideBrokenBlocks["right"].Add(blockIndex);
+                    //outsideBrokenBlocks["right"].Add(blockIndex);
+                    rightBrokenBlocks.Add(blockIndex);
                 }
                 if (!(blockIndex % (worldDimensions * worldDimensions) < (worldDimensions * (worldDimensions - 1))))
                 {
-                    outsideBrokenBlocks["bottom"].Add(blockIndex);
+                    //outsideBrokenBlocks["bottom"].Add(blockIndex);
+                    bottomBrokenBlocks.Add(blockIndex);
                 }
                 if (!((blockIndex) % worldDimensions != 0 && (blockIndex - 1) >= 0))
                 {
-                    outsideBrokenBlocks["left"].Add(blockIndex);
+                    //outsideBrokenBlocks["left"].Add(blockIndex);
+                    leftBrokenBlocks.Add(blockIndex);
                 }
                 if (!(blockIndex < (worldDimensions * worldDimensions * (worldDimensions - 1))))
                 {
-                    outsideBrokenBlocks["front"].Add(blockIndex);
+                    //outsideBrokenBlocks["front"].Add(blockIndex);
+                    frontBrokenBlocks.Add(blockIndex);
                 }
                 if (!(blockIndex >= (worldDimensions * worldDimensions)))
                 {
-                    outsideBrokenBlocks["back"].Add(blockIndex);
+                    //outsideBrokenBlocks["back"].Add(blockIndex);
+                    backBrokenBlocks.Add(blockIndex);
                 }
             }
             if(exposedBlocks[blockIndex] == 2 && childrenBlocks.transform.position.y == 0)
@@ -120,10 +156,11 @@ public class chunkDistanceCalc : MonoBehaviour
                 if (GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 0) < transform.parent.transform.childCount
                     && GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 0) > 0)
                 {
-                    if ((surroundingChunkToCheck = transform.parent.transform.GetChild(GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 0)))
-                    && surroundingChunkToCheck.gameObject.GetComponent<chunkDistanceCalc>().outsideBrokenBlocks.ContainsKey("top"))
+                    if ((surroundingChunkToCheck = transform.parent.transform.GetChild(GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 0))))
+                    //&& surroundingChunkToCheck.gameObject.GetComponent<chunkDistanceCalc>().outsideBrokenBlocks.ContainsKey("top"))
                     {
-                        foreach (var item in surroundingChunkToCheck.gameObject.GetComponent<chunkDistanceCalc>().outsideBrokenBlocks["top"])
+                        //foreach (var item in surroundingChunkToCheck.gameObject.GetComponent<chunkDistanceCalc>().outsideBrokenBlocks["top"])
+                        foreach(var item in topBrokenBlocks)
                         {
                             //if (exposedBlocks[item] != 0)
                             {
@@ -140,11 +177,11 @@ public class chunkDistanceCalc : MonoBehaviour
                 posToCheck.x += worldDimensions;
                 if (GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 1) < transform.parent.transform.childCount)
                 {
-                    if ((surroundingChunkToCheck = transform.parent.transform.GetChild(GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 1)))
-                    && surroundingChunkToCheck.gameObject.GetComponent<chunkDistanceCalc>().outsideBrokenBlocks.ContainsKey("right"))
+                    if ((surroundingChunkToCheck = transform.parent.transform.GetChild(GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 1))))
+                    //&& surroundingChunkToCheck.gameObject.GetComponent<chunkDistanceCalc>().outsideBrokenBlocks.ContainsKey("right"))
                     {
-
-                        foreach (var item in surroundingChunkToCheck.gameObject.GetComponent<chunkDistanceCalc>().outsideBrokenBlocks["right"])
+                        //foreach (var item in surroundingChunkToCheck.gameObject.GetComponent<chunkDistanceCalc>().outsideBrokenBlocks["right"])
+                        foreach (var item in rightBrokenBlocks)
                         {
                             //if (exposedBlocks[item] != 0)
                             {
@@ -161,10 +198,11 @@ public class chunkDistanceCalc : MonoBehaviour
                 posToCheck.y -= worldDimensions;
                 if (GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 2) < transform.parent.transform.childCount)
                 {
-                    if ((surroundingChunkToCheck = transform.parent.transform.GetChild(GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 2)))
-                    && surroundingChunkToCheck.gameObject.GetComponent<chunkDistanceCalc>().outsideBrokenBlocks.ContainsKey("bottom"))
+                    if ((surroundingChunkToCheck = transform.parent.transform.GetChild(GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 2))))
+                    //&& surroundingChunkToCheck.gameObject.GetComponent<chunkDistanceCalc>().outsideBrokenBlocks.ContainsKey("bottom"))
                     {
-                        foreach (var item in surroundingChunkToCheck.gameObject.GetComponent<chunkDistanceCalc>().outsideBrokenBlocks["bottom"])
+                        //foreach (var item in surroundingChunkToCheck.gameObject.GetComponent<chunkDistanceCalc>().outsideBrokenBlocks["bottom"])
+                        foreach (var item in bottomBrokenBlocks)
                         {
                             //if (exposedBlocks[item] != 0)
                             {
@@ -181,10 +219,11 @@ public class chunkDistanceCalc : MonoBehaviour
                 posToCheck.x -= worldDimensions;
                 if (GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 3) < transform.parent.transform.childCount)
                 {
-                    if ((surroundingChunkToCheck = transform.parent.transform.GetChild(GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 3)))
-                    && surroundingChunkToCheck.gameObject.GetComponent<chunkDistanceCalc>().outsideBrokenBlocks.ContainsKey("left"))
+                    if ((surroundingChunkToCheck = transform.parent.transform.GetChild(GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 3))))
+                    //&& surroundingChunkToCheck.gameObject.GetComponent<chunkDistanceCalc>().outsideBrokenBlocks.ContainsKey("left"))
                     {
-                        foreach (var item in surroundingChunkToCheck.gameObject.GetComponent<chunkDistanceCalc>().outsideBrokenBlocks["left"])
+                        //foreach (var item in surroundingChunkToCheck.gameObject.GetComponent<chunkDistanceCalc>().outsideBrokenBlocks["left"])
+                        foreach (var item in leftBrokenBlocks)
                         {
                             //if (exposedBlocks[item] != 0)
                             {
@@ -201,10 +240,11 @@ public class chunkDistanceCalc : MonoBehaviour
                 posToCheck.z += worldDimensions;
                 if (GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 4) < transform.parent.transform.childCount)
                 {
-                    if ((surroundingChunkToCheck = transform.parent.transform.GetChild(GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 4)))
-                    && surroundingChunkToCheck.gameObject.GetComponent<chunkDistanceCalc>().outsideBrokenBlocks.ContainsKey("front"))
+                    if ((surroundingChunkToCheck = transform.parent.transform.GetChild(GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 4))))
+                    //&& surroundingChunkToCheck.gameObject.GetComponent<chunkDistanceCalc>().outsideBrokenBlocks.ContainsKey("front"))
                     {
-                        foreach (var item in surroundingChunkToCheck.gameObject.GetComponent<chunkDistanceCalc>().outsideBrokenBlocks["front"])
+                        //foreach (var item in surroundingChunkToCheck.gameObject.GetComponent<chunkDistanceCalc>().outsideBrokenBlocks["front"])
+                        foreach (var item in frontBrokenBlocks)
                         {
                             //if (exposedBlocks[item] != 0)
                             {
@@ -221,10 +261,11 @@ public class chunkDistanceCalc : MonoBehaviour
                 posToCheck.z -= worldDimensions;
                 if (GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 5) < transform.parent.transform.childCount)
                 {
-                    if ((surroundingChunkToCheck = transform.parent.transform.GetChild(GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 5)))
-                    && surroundingChunkToCheck.gameObject.GetComponent<chunkDistanceCalc>().outsideBrokenBlocks.ContainsKey("back"))
+                    if ((surroundingChunkToCheck = transform.parent.transform.GetChild(GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 5))))
+                    //&& surroundingChunkToCheck.gameObject.GetComponent<chunkDistanceCalc>().outsideBrokenBlocks.ContainsKey("back"))
                     {
-                        foreach (var item in surroundingChunkToCheck.gameObject.GetComponent<chunkDistanceCalc>().outsideBrokenBlocks["back"])
+                        //foreach (var item in surroundingChunkToCheck.gameObject.GetComponent<chunkDistanceCalc>().outsideBrokenBlocks["back"])
+                        foreach (var item in backBrokenBlocks)
                         {
                             //if (exposedBlocks[item] != 0)
                             {
@@ -253,13 +294,15 @@ public class chunkDistanceCalc : MonoBehaviour
 
     private void showAllActiveBlocks()
     {
-        for (int childBlockIndex = 0; childBlockIndex < exposedBlocks.Length; childBlockIndex++)
+        /*for (int childBlockIndex = 0; childBlockIndex < exposedBlocks.Length; childBlockIndex++)
         {
             if (exposedBlocks[childBlockIndex] == 1)// || exposedBlocks[childBlockIndex] == 2)
             {
                 transform.GetChild(0).transform.GetChild(childBlockIndex).gameObject.SetActive(true);
             }
-        }
+        }*/
+        transform.GetChild(1).gameObject.SetActive(true);
+        transform.GetChild(0).gameObject.SetActive(true);
         showingClose = true;
     }
     private void showActiveBlocks()
@@ -275,18 +318,22 @@ public class chunkDistanceCalc : MonoBehaviour
                 transform.GetChild(0).transform.GetChild(childBlockIndex).gameObject.SetActive(false);
             }
         }
+        transform.GetChild(1).gameObject.SetActive(true);
+        transform.GetChild(0).gameObject.SetActive(true);
         showing = true;
         showingClose = false;
     }
     private void hideActiveBlocks()
     {
-        for (int childBlockIndex = 0; childBlockIndex < exposedBlocks.Length; childBlockIndex++)
+        /*for (int childBlockIndex = 0; childBlockIndex < exposedBlocks.Length; childBlockIndex++)
         {
             if (exposedBlocks[childBlockIndex] == 1)
             {
                 transform.GetChild(0).transform.GetChild(childBlockIndex).gameObject.SetActive(false);
             }
-        }
+        }*/
+        transform.GetChild(1).gameObject.SetActive(false);
+        transform.GetChild(0).gameObject.SetActive(false);
         showing = false;
         showingClose = false;
     }
@@ -300,10 +347,16 @@ public class chunkDistanceCalc : MonoBehaviour
             
             exposedBlocks[blockNum] = stateNum;
         }
+        if(stateNum == 1 && transform.childCount == 2)
+        {
+            //UnityEngine.Debug.Log(transform.childCount);
+            transform.GetChild(0).transform.GetChild(blockNum).gameObject.SetActive(true);
+        }
         if(stateNum == 0)
         {
             transform.GetChild(0).transform.GetChild(blockNum).gameObject.SetActive(false);
-            breakBlockAndShowSurrounds(blockNum);
+            //breakBlockAndShowSurrounds(blockNum);
+            breakBlockAndShowSurroundsNew(blockNum);
         }
         showing = false;
         showingClose = false;
@@ -426,6 +479,132 @@ public class chunkDistanceCalc : MonoBehaviour
         }
     }
 
+    private void breakBlockAndShowSurroundsNew(int blockChildNum)
+    {
+        GameObject foundChunk;
+
+        //top
+        if(blockChildNum >= squaredWorldDimensions)
+        {
+            //UnityEngine.Debug.Log("top1 " + blockChildNum);
+            if (checkChild(blockChildNum - squaredWorldDimensions) != 0)
+            {
+                changeBlockState(blockChildNum - squaredWorldDimensions, 1);
+            }
+        }
+        else if (GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 0) < transform.parent.childCount && GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 0) >= 0)
+        {
+            //UnityEngine.Debug.Log("top2 " + blockChildNum);
+            foundChunk = transform.parent.transform.GetChild(GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 0)).gameObject;
+            if (foundChunk.GetComponent<chunkDistanceCalc>().checkChild(blockChildNum + (squaredWorldDimensions * (worldDimensions - 1))) != 0)
+            {
+                foundChunk.GetComponent<chunkDistanceCalc>().changeBlockState(blockChildNum + (squaredWorldDimensions * (worldDimensions - 1)), 1);
+            }
+        }
+
+        //right
+        if ((blockChildNum + 1) % worldDimensions != 0)// || blockChildNum == 0)
+        {
+            if (checkChild(blockChildNum + 1) != 0)
+            {
+                changeBlockState(blockChildNum + 1, 1);
+            }
+        }
+        else if (GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 1) < transform.parent.childCount && GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 1) >= 0)
+        {
+            foundChunk = transform.parent.transform.GetChild(GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 1)).gameObject;
+
+            if (foundChunk.transform.position.y == transform.position.y)
+            {
+                if (foundChunk.GetComponent<chunkDistanceCalc>().checkChild(blockChildNum - (worldDimensions - 1)) != 0)
+                {
+                    foundChunk.GetComponent<chunkDistanceCalc>().changeBlockState(blockChildNum - (worldDimensions - 1), 1);
+                }
+            }
+        }
+
+        //bottom
+        // > squaredWorldDimensions * (worldDimension -1) && < cubedWorldDimension
+        if (blockChildNum < (squaredWorldDimensions * (worldDimensions-1)))
+        {
+            if (checkChild(blockChildNum + squaredWorldDimensions) != 0)
+            {
+                changeBlockState(blockChildNum + squaredWorldDimensions, 1);
+            }
+        }
+        else if (GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 2) < transform.parent.childCount && GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 2) >= 0)
+        {
+            foundChunk = transform.parent.transform.GetChild(GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 2)).gameObject;
+            if (foundChunk.GetComponent<chunkDistanceCalc>().checkChild(blockChildNum - (squaredWorldDimensions * (worldDimensions - 1))) != 0)
+            {
+                foundChunk.GetComponent<chunkDistanceCalc>().changeBlockState(blockChildNum - (squaredWorldDimensions * (worldDimensions - 1)), 1);
+            }
+        }
+
+        //left
+        if ((blockChildNum) % worldDimensions != 0 && (blockChildNum - 1) >= 0)
+        {
+            if (checkChild(blockChildNum - 1) != 0)
+            {
+                changeBlockState(blockChildNum - 1, 1);
+            }
+        }
+        else if (GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 3) < transform.parent.childCount && GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 3) >= 0)
+        {
+            foundChunk = transform.parent.transform.GetChild(GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 3)).gameObject;
+            if (foundChunk.transform.position.y == transform.position.y)
+            {
+                if (foundChunk.GetComponent<chunkDistanceCalc>().checkChild(blockChildNum + worldDimensions - 1) != 0)
+                {
+                    foundChunk.GetComponent<chunkDistanceCalc>().changeBlockState(blockChildNum + worldDimensions - 1, 1);
+                }
+            }
+        }
+
+        //front
+        if ((blockChildNum % squaredWorldDimensions) >= worldDimensions)
+        {
+            if (checkChild(blockChildNum - worldDimensions) != 0)
+            {
+                changeBlockState(blockChildNum - worldDimensions, 1);
+            }
+        }
+        else if (GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 4) < transform.parent.childCount && GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 4) >= 0)
+        {
+            foundChunk = transform.parent.transform.GetChild(GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 4)).gameObject;
+            if (foundChunk.transform.position.y == transform.position.y)
+            {
+                //if (foundChunk.GetComponent<chunkDistanceCalc>().checkChild(blockChildNum - (squaredWorldDimensions-1)) != 0)
+                if (foundChunk.GetComponent<chunkDistanceCalc>().checkChild(blockChildNum + (worldDimensions * (worldDimensions - 1))) != 0)
+                {
+                    //foundChunk.GetComponent<chunkDistanceCalc>().changeBlockState(blockChildNum - (squaredWorldDimensions - 1), 1);
+                    foundChunk.GetComponent<chunkDistanceCalc>().changeBlockState(blockChildNum + (worldDimensions * (worldDimensions - 1)), 1);
+                }
+            }
+        }
+
+        //back
+        if ((blockChildNum % squaredWorldDimensions) < (squaredWorldDimensions - worldDimensions))// || (blockChildNum - worldDimensions) % squaredWorldDimensions == 0)
+        {
+            if (checkChild(blockChildNum + worldDimensions) != 0)
+            {
+                changeBlockState(blockChildNum + worldDimensions, 1);
+            }
+        }
+        else if (GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 5) < transform.parent.childCount && GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 5) >= 0)
+        {
+            //blockChildNum - squaredWorldDimensions - squaredWorldDimesions-worldDimensions
+            foundChunk = transform.parent.transform.GetChild(GetComponentInParent<fixedWorldGen>().findChunkLoopNum(transform.GetSiblingIndex(), 5)).gameObject;
+            if (foundChunk.transform.position.y == transform.position.y)
+            {
+                if (foundChunk.GetComponent<chunkDistanceCalc>().checkChild(blockChildNum - (worldDimensions * (worldDimensions - 1))) != 0)
+                {
+                    foundChunk.GetComponent<chunkDistanceCalc>().changeBlockState(blockChildNum - (worldDimensions * (worldDimensions - 1)), 1);
+                }
+            }
+        }
+    }
+
     private IEnumerator checkIfShouldShow()
     {
         while (true)
@@ -437,8 +616,8 @@ public class chunkDistanceCalc : MonoBehaviour
             {
                 if (!showingClose)
                 {
-                    transform.GetChild(0).gameObject.SetActive(true);
-                    transform.GetChild(1).gameObject.SetActive(true);
+                    //transform.GetChild(0).gameObject.SetActive(true);
+                    //transform.GetChild(1).gameObject.SetActive(true);
                     showAllActiveBlocks();
                 }
             }
@@ -446,8 +625,8 @@ public class chunkDistanceCalc : MonoBehaviour
             {
                 if (!showing && showingClose)
                 {
-                    transform.GetChild(1).gameObject.SetActive(true);
-                    transform.GetChild(0).gameObject.SetActive(true);
+                    //transform.GetChild(1).gameObject.SetActive(true);
+                    //transform.GetChild(0).gameObject.SetActive(true);
                     showActiveBlocks();
                 }
             }
@@ -455,8 +634,132 @@ public class chunkDistanceCalc : MonoBehaviour
             {
                 if (showing)
                 {
-                    transform.GetChild(1).gameObject.SetActive(false);
-                    transform.GetChild(0).gameObject.SetActive(false);
+                    //transform.GetChild(1).gameObject.SetActive(false);
+                    //transform.GetChild(0).gameObject.SetActive(false);
+                    hideActiveBlocks();
+                }
+            }
+        }
+    }
+    Vector3 targetDir;
+    float angle;
+    float chunkDistance;
+    private IEnumerator checkIFShouldShowAngle()
+    {
+        while(true)
+        {
+            yield return new WaitForSeconds(.2f);
+            //yield return new WaitForFixedUpdate();
+
+            chunkDistance = Vector3.Distance(transform.position, playerRef.transform.position);
+
+            if (chunkDistance < viewDistanceControl / 2)
+            {
+                if(!showingClose)
+                {
+                    showAllActiveBlocks();
+                }
+            }
+            else if(chunkDistance < viewDistanceControl)
+            {
+                targetDir = transform.position - fpsControllerRef.transform.position;
+
+                angle = Vector3.Angle(targetDir, playerRef.transform.forward);
+                if (angle < 100.0f)
+                {
+                    if (!showingClose)
+                    {
+                        showAllActiveBlocks();
+                    }
+                    //UnityEngine.Debug.Log("Looking at" + transform.GetSiblingIndex());
+                }
+                else
+                {
+                    if (showingClose)
+                    {
+                        hideActiveBlocks();
+                    }
+                }
+            }
+            else
+            {
+                if(showingClose)
+                {
+                    hideActiveBlocks();
+                }
+            }
+        }
+    }
+
+    private IEnumerator checkIfShouldShowRotation()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(.5f);
+            float chunkDistance = Vector3.Distance(transform.position, playerRef.transform.position);
+
+            if (chunkDistance < viewDistanceControl)
+            {
+                //Looking North-East
+                if (fpsControllerRef.transform.localEulerAngles.y >= 0 && fpsControllerRef.transform.localEulerAngles.y < 90)
+                {
+                    if (transform.position.z + worldDimensions < playerRef.transform.position.z && transform.position.x + worldDimensions < playerRef.transform.position.x)
+                    {
+                        //if (showingClose)
+                        {
+                            hideActiveBlocks();
+                        }
+                    }
+                    else
+                    {
+                        //if (!showingClose)
+                        {
+                            showAllActiveBlocks();
+                        }
+                        //showAllActiveBlocks();
+                    }
+                }
+                //Looking South-East
+                else if (fpsControllerRef.transform.localEulerAngles.y >= 90 && fpsControllerRef.transform.localEulerAngles.y < 180)
+                {
+                    if (transform.position.z > playerRef.transform.position.z && transform.position.x + worldDimensions < playerRef.transform.position.x)
+                    {
+                        hideActiveBlocks();
+                    }
+                    else
+                    {
+                        showAllActiveBlocks();
+                    }
+                }
+                //Looking South-West
+                else if (fpsControllerRef.transform.localEulerAngles.y >= 180 && fpsControllerRef.transform.localEulerAngles.y < 270)
+                {
+                    if (transform.position.z > playerRef.transform.position.z && transform.position.x > playerRef.transform.position.x)
+                    {
+                        hideActiveBlocks();
+                    }
+                    else
+                    {
+                        showAllActiveBlocks();
+                    }
+                }
+                //Looking North-West
+                else if (fpsControllerRef.transform.localEulerAngles.y >= 270 && fpsControllerRef.transform.localEulerAngles.y <= 360)
+                {
+                    if (transform.position.z + worldDimensions < playerRef.transform.position.z && transform.position.x - worldDimensions > playerRef.transform.position.x)
+                    {
+                        hideActiveBlocks();
+                    }
+                    else
+                    {
+                        showAllActiveBlocks();
+                    }
+                }
+            }
+            else
+            {
+                if (showingClose)
+                {
                     hideActiveBlocks();
                 }
             }
