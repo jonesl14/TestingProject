@@ -7,14 +7,72 @@ public class BlockBreaking : MonoBehaviour
     private int blockHealth = 1;
     private bool beingBroken = false;
     private int worldDimensions, squaredWorldDimensions, cubedWorldDimensions;
+    public int blockStatus = 0;
+
+    private Transform fpsControllerRayRef;
 
     private void Awake()
     {
+        fpsControllerRayRef = transform.parent.GetComponentInParent<chunkDistanceCalc>().fpsControllerRef.transform.GetChild(1);
+        //GetComponent<Renderer>().enabled = false;
         if (GetComponentInParent<chunkDistanceCalc>())
         {
             worldDimensions = GetComponentInParent<chunkDistanceCalc>().worldDimensions;
             squaredWorldDimensions = worldDimensions * worldDimensions;
             cubedWorldDimensions = worldDimensions * worldDimensions * worldDimensions;
+        }
+    }
+
+    bool showingClose = false;
+    int tempViewDistance = 10;
+
+    private void Updated()
+    {
+        //if (transform.parent.GetComponentInParent<chunkDistanceCalc>().fpsControllerRef && blockStatus == 1)
+        if(blockStatus == 1)
+        {
+            RaycastHit hit;
+
+            //Vector3 rayDirection = (transform.parent.GetComponentInParent<chunkDistanceCalc>().fpsControllerRef.transform.GetChild(1).position - transform.position).normalized;
+            //float rayDistance = Vector3.Distance(transform.parent.GetComponentInParent<chunkDistanceCalc>().fpsControllerRef.transform.GetChild(1).position, transform.position);
+
+            Vector3 rayDirection = (fpsControllerRayRef.position - transform.position).normalized;
+            float rayDistance = Vector3.Distance(fpsControllerRayRef.position, transform.position);
+
+            if (rayDistance >= tempViewDistance)// && rayDistance < 10 * 3)
+            {
+                //10 = blocks   longer view distance but flashing chunks that appear and dissapear
+                //15 = chunks   short view distance but no flashing chunks
+                int layerMask = 1 << 10;
+
+                //if (Physics.Raycast(transform.position, rayDirection, out hit, rayDistance, layerMask))
+                if (Physics.Raycast(transform.position, rayDirection, rayDistance, layerMask))
+                {
+                    //Debug.DrawRay(centreChunkPos, rayDirection * hit.distance, Color.yellow);
+                    if (showingClose)
+                    {
+                        GetComponent<Renderer>().enabled = false;
+                        showingClose = false;
+                    }
+                }
+                else
+                {
+                    //Debug.DrawRay(centreChunkPos, rayDirection * 1000, Color.white);
+                    if (!showingClose)
+                    {
+                        GetComponent<Renderer>().enabled = true;
+                        showingClose = true;
+                    }
+                }
+            }
+            else if (rayDistance < tempViewDistance)
+            {
+                if (!showingClose)
+                {
+                    GetComponent<Renderer>().enabled = true;
+                    showingClose = true;
+                }
+            }
         }
     }
 
@@ -70,11 +128,20 @@ public class BlockBreaking : MonoBehaviour
 
     public void instaKillBlock()
     {
-        //change this to a value that can be set and changed
-        if(transform.position.y < -3)
+        worldDimensions = GetComponentInParent<chunkDistanceCalc>().worldDimensions;
+        squaredWorldDimensions = worldDimensions * worldDimensions;
+        cubedWorldDimensions = worldDimensions * worldDimensions * worldDimensions;
+
+        //UnityEngine.Debug.Log("2\t\t" + transform.GetSiblingIndex());
+        //if(transform.position.y < -3)
         {
+            //UnityEngine.Debug.Log("3\t\t" + transform.GetSiblingIndex());
             transform.parent.transform.parent.GetComponent<chunkDistanceCalc>().changeBlockState(transform.GetSiblingIndex(), 0);
-            breakBlocksAround(UnityEngine.Random.Range(worldDimensions, squaredWorldDimensions));
+            //int tempBreakSize = UnityEngine.Random.Range(worldDimensions, squaredWorldDimensions);
+            //UnityEngine.Debug.Log(worldDimensions + "\t" + squaredWorldDimensions + "\t" + tempBreakSize);
+            //breakBlocksAround(tempBreakSize);
+            breakBlocksAround(UnityEngine.Random.Range(1, worldDimensions));
+            //breakBlocksAround(UnityEngine.Random.Range(worldDimensions, squaredWorldDimensions));
         }
     }
 
@@ -84,40 +151,100 @@ public class BlockBreaking : MonoBehaviour
 
         for (int breakIndex = 1; breakIndex < sizeOfBreak; breakIndex++)
         {
-            if ((thisChildIndex + breakIndex) < cubedWorldDimensions)
+            if ((thisChildIndex + breakIndex) < cubedWorldDimensions)//moves right
             {
-                transform.parent.GetChild(thisChildIndex + breakIndex).GetComponent<BlockBreaking>().instaKillBlock2();
-            }
-            if ((thisChildIndex - breakIndex) > 0)
-            {
-                transform.parent.GetChild(thisChildIndex - breakIndex).GetComponent<BlockBreaking>().instaKillBlock2();
-            }
-
-            if((thisChildIndex + (breakIndex * worldDimensions)) < cubedWorldDimensions)
-            {
-                transform.parent.GetChild(thisChildIndex + (breakIndex * worldDimensions)).GetComponent<BlockBreaking>().instaKillBlock2();
-            }
-            if ((thisChildIndex - (breakIndex * worldDimensions)) > 0)
-            {
-                transform.parent.GetChild(thisChildIndex - (breakIndex * worldDimensions)).GetComponent<BlockBreaking>().instaKillBlock2();
-            }
-
-            if ((thisChildIndex + (breakIndex * squaredWorldDimensions)) < cubedWorldDimensions)
-            {
-                transform.parent.GetChild(thisChildIndex + (breakIndex * squaredWorldDimensions)).GetComponent<BlockBreaking>().instaKillBlock2();
-
-                if ((thisChildIndex + (breakIndex * squaredWorldDimensions + breakIndex)) < cubedWorldDimensions)
+                GetComponentInParent<chunkDistanceCalc>().changeBlockState(thisChildIndex + breakIndex, 0);
+                //transform.parent.GetChild(thisChildIndex + breakIndex).GetComponent<BlockBreaking>().instaKillBlock2();
+                if ((thisChildIndex + breakIndex + (breakIndex * squaredWorldDimensions)) < cubedWorldDimensions)//moves right and down one
                 {
-                    transform.parent.GetChild(thisChildIndex + (breakIndex * squaredWorldDimensions + breakIndex)).GetComponent<BlockBreaking>().instaKillBlock2();
+                    GetComponentInParent<chunkDistanceCalc>().changeBlockState(thisChildIndex + breakIndex + (breakIndex * squaredWorldDimensions),0);
+                    //transform.parent.GetChild(thisChildIndex + breakIndex + (breakIndex * squaredWorldDimensions)).GetComponent<BlockBreaking>().instaKillBlock2();
+                }
+                if (((thisChildIndex + breakIndex - (breakIndex * squaredWorldDimensions)) < cubedWorldDimensions) && (thisChildIndex + breakIndex - (breakIndex * squaredWorldDimensions)) > 0)//moves right and up one
+                {
+                    GetComponentInParent<chunkDistanceCalc>().changeBlockState(thisChildIndex + breakIndex - (breakIndex * squaredWorldDimensions), 0);
+                    //transform.parent.GetChild(thisChildIndex + breakIndex - (breakIndex * squaredWorldDimensions)).GetComponent<BlockBreaking>().instaKillBlock2();
                 }
             }
-            if ((thisChildIndex - (breakIndex * squaredWorldDimensions)) > 0)
+            if ((thisChildIndex - breakIndex) > 0)//moves left
             {
-                transform.parent.GetChild(thisChildIndex - (breakIndex * squaredWorldDimensions)).GetComponent<BlockBreaking>().instaKillBlock2();
-
-                if ((thisChildIndex - (breakIndex * squaredWorldDimensions - breakIndex)) > 0 && (thisChildIndex - (breakIndex * squaredWorldDimensions - breakIndex)) < cubedWorldDimensions)
+                GetComponentInParent<chunkDistanceCalc>().changeBlockState(thisChildIndex - breakIndex, 0);
+                //transform.parent.GetChild(thisChildIndex - breakIndex).GetComponent<BlockBreaking>().instaKillBlock2();
+                if ((thisChildIndex - breakIndex + (breakIndex * squaredWorldDimensions)) < cubedWorldDimensions)//moves left and down one
                 {
-                    transform.parent.GetChild(thisChildIndex - (breakIndex * squaredWorldDimensions - breakIndex)).GetComponent<BlockBreaking>().instaKillBlock2();
+                    GetComponentInParent<chunkDistanceCalc>().changeBlockState(thisChildIndex - breakIndex + (breakIndex * squaredWorldDimensions), 0);
+                    //transform.parent.GetChild(thisChildIndex - breakIndex + (breakIndex * squaredWorldDimensions)).GetComponent<BlockBreaking>().instaKillBlock2();
+                }
+                if (((thisChildIndex - breakIndex - (breakIndex * squaredWorldDimensions)) < cubedWorldDimensions) && (thisChildIndex - breakIndex - (breakIndex * squaredWorldDimensions)) > 0)//moves left and up one
+                {
+                    GetComponentInParent<chunkDistanceCalc>().changeBlockState(thisChildIndex - breakIndex - (breakIndex * squaredWorldDimensions), 0);
+                    //transform.parent.GetChild(thisChildIndex - breakIndex - (breakIndex * squaredWorldDimensions)).GetComponent<BlockBreaking>().instaKillBlock2();
+                }
+            }
+
+            if((thisChildIndex + (breakIndex * worldDimensions)) < cubedWorldDimensions)//moves forward
+            {
+                GetComponentInParent<chunkDistanceCalc>().changeBlockState(thisChildIndex + (breakIndex * worldDimensions), 0);
+                //transform.parent.GetChild(thisChildIndex + (breakIndex * worldDimensions)).GetComponent<BlockBreaking>().instaKillBlock2();
+            }
+            if ((thisChildIndex - (breakIndex * worldDimensions)) > 0)//moves back
+            {
+                GetComponentInParent<chunkDistanceCalc>().changeBlockState(thisChildIndex - (breakIndex * worldDimensions), 0);
+                //transform.parent.GetChild(thisChildIndex - (breakIndex * worldDimensions)).GetComponent<BlockBreaking>().instaKillBlock2();
+            }
+
+            if ((thisChildIndex + (breakIndex * squaredWorldDimensions)) < cubedWorldDimensions)//moves down
+            {
+                GetComponentInParent<chunkDistanceCalc>().changeBlockState(thisChildIndex + (breakIndex * squaredWorldDimensions), 0);
+                //transform.parent.GetChild(thisChildIndex + (breakIndex * squaredWorldDimensions)).GetComponent<BlockBreaking>().instaKillBlock2();
+                if ((thisChildIndex + (breakIndex * squaredWorldDimensions) + breakIndex) < cubedWorldDimensions)//moves down and one to the right
+                {
+                    GetComponentInParent<chunkDistanceCalc>().changeBlockState(thisChildIndex + (breakIndex * squaredWorldDimensions) + breakIndex, 0);
+                    //transform.parent.GetChild(thisChildIndex + (breakIndex * squaredWorldDimensions) + breakIndex).GetComponent<BlockBreaking>().instaKillBlock2();
+                }
+                if ((thisChildIndex + (breakIndex * squaredWorldDimensions) - breakIndex) < cubedWorldDimensions)//moves down and one to the right
+                {
+                    GetComponentInParent<chunkDistanceCalc>().changeBlockState(thisChildIndex + (breakIndex * squaredWorldDimensions) - breakIndex, 0);
+                    //transform.parent.GetChild(thisChildIndex + (breakIndex * squaredWorldDimensions) - breakIndex).GetComponent<BlockBreaking>().instaKillBlock2();
+                }
+
+                if ((thisChildIndex + (breakIndex * squaredWorldDimensions) + (breakIndex * worldDimensions)) < cubedWorldDimensions)//moves down and one forward
+                {
+                    GetComponentInParent<chunkDistanceCalc>().changeBlockState(thisChildIndex + (breakIndex * squaredWorldDimensions) + (breakIndex * worldDimensions), 0);
+                    //transform.parent.GetChild(thisChildIndex + (breakIndex * squaredWorldDimensions) + (breakIndex * worldDimensions)).GetComponent<BlockBreaking>().instaKillBlock2();
+                }
+                if ((thisChildIndex + (breakIndex * squaredWorldDimensions) - (breakIndex * worldDimensions)) < cubedWorldDimensions)//moves down and one back
+                {
+                    GetComponentInParent<chunkDistanceCalc>().changeBlockState(thisChildIndex + (breakIndex * squaredWorldDimensions) - (breakIndex * worldDimensions), 0);
+                    //transform.parent.GetChild(thisChildIndex + (breakIndex * squaredWorldDimensions) - (breakIndex * worldDimensions)).GetComponent<BlockBreaking>().instaKillBlock2();
+                }
+            }
+            if ((thisChildIndex - (breakIndex * squaredWorldDimensions)) > 0)//moves up
+            {
+                GetComponentInParent<chunkDistanceCalc>().changeBlockState(thisChildIndex - (breakIndex * squaredWorldDimensions), 0);
+                //transform.parent.GetChild(thisChildIndex - (breakIndex * squaredWorldDimensions)).GetComponent<BlockBreaking>().instaKillBlock2();
+                if ((thisChildIndex - (breakIndex * squaredWorldDimensions) - breakIndex) > 0 && (thisChildIndex - (breakIndex * squaredWorldDimensions) - breakIndex) < cubedWorldDimensions)//moves up and one to the left
+                {
+                    GetComponentInParent<chunkDistanceCalc>().changeBlockState(thisChildIndex - (breakIndex * squaredWorldDimensions) - breakIndex, 0);
+                    //transform.parent.GetChild(thisChildIndex - (breakIndex * squaredWorldDimensions) - breakIndex).GetComponent<BlockBreaking>().instaKillBlock2();
+                }
+                if ((thisChildIndex - (breakIndex * squaredWorldDimensions) + breakIndex) > 0 && (thisChildIndex - (breakIndex * squaredWorldDimensions) + breakIndex) < cubedWorldDimensions)//moves up and one to the left
+                {
+                    GetComponentInParent<chunkDistanceCalc>().changeBlockState(thisChildIndex - (breakIndex * squaredWorldDimensions) + breakIndex, 0);
+                    //transform.parent.GetChild(thisChildIndex - (breakIndex * squaredWorldDimensions) + breakIndex).GetComponent<BlockBreaking>().instaKillBlock2();
+                }
+
+                if ((thisChildIndex - (breakIndex * squaredWorldDimensions) - (breakIndex * worldDimensions)) > 0 
+                    && (thisChildIndex - (breakIndex * squaredWorldDimensions) - (breakIndex * worldDimensions)) < cubedWorldDimensions)//moves up and one back
+                {
+                    GetComponentInParent<chunkDistanceCalc>().changeBlockState(thisChildIndex - (breakIndex * squaredWorldDimensions) - (breakIndex * worldDimensions), 0);
+                    //transform.parent.GetChild(thisChildIndex - (breakIndex * squaredWorldDimensions) - (breakIndex * worldDimensions)).GetComponent<BlockBreaking>().instaKillBlock2();
+                }
+                if ((thisChildIndex - (breakIndex * squaredWorldDimensions) + (breakIndex * worldDimensions)) > 0 
+                    && (thisChildIndex - (breakIndex * squaredWorldDimensions) + (breakIndex * worldDimensions)) < cubedWorldDimensions)//moves up and one forward
+                {
+                    GetComponentInParent<chunkDistanceCalc>().changeBlockState(thisChildIndex - (breakIndex * squaredWorldDimensions) + (breakIndex * worldDimensions), 0);
+                    //transform.parent.GetChild(thisChildIndex - (breakIndex * squaredWorldDimensions) + (breakIndex * worldDimensions)).GetComponent<BlockBreaking>().instaKillBlock2();
                 }
             }
         }

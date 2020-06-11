@@ -9,7 +9,7 @@ using System;
 public class chunkDistanceCalc : MonoBehaviour
 {
     int viewDistanceControl = 50;
-    private GameObject playerRef, fpsControllerRef;
+    public GameObject playerRef, fpsControllerRef;
     public int worldDimensions, squaredWorldDimensions, cubedWorldDimensions;
     private bool showing = true, showingClose = false;
     //public Dictionary<string, List<int>> outsideBrokenBlocks = new Dictionary<string, List<int>>();
@@ -19,8 +19,11 @@ public class chunkDistanceCalc : MonoBehaviour
 
     protected int[] exposedBlocks;
 
+    Vector3 centreChunkPos;
+
     private void Awake()
     {
+        viewDistanceControl = GetComponentInParent<fixedWorldGen>().viewDistance;
         worldDimensions = transform.parent.GetComponent<fixedWorldGen>().worldDimensions;
         numberOfBlocksToBreak = transform.parent.GetComponent<fixedWorldGen>().numOfBlocksToBreak;
         squaredWorldDimensions = worldDimensions * worldDimensions;
@@ -42,6 +45,15 @@ public class chunkDistanceCalc : MonoBehaviour
         outsideBrokenBlocks.Add("left", new List<int>());//left
         outsideBrokenBlocks.Add("front", new List<int>());//front
         outsideBrokenBlocks.Add("back", new List<int>());//back*/
+        //worldDimensions /2.0f - .5
+        Vector3 colliderCenter = new Vector3((worldDimensions / 2.0f) - .5f, -((worldDimensions / 2.0f) - .5f), -((worldDimensions / 2.0f) - .5f));
+        GetComponent<BoxCollider>().center = colliderCenter;
+        GetComponent<BoxCollider>().size = new Vector3(worldDimensions, worldDimensions, worldDimensions);
+
+        centreChunkPos = transform.position;
+        centreChunkPos.x += (worldDimensions / 2.0f) - .5f;
+        centreChunkPos.y -= (worldDimensions / 2.0f) - .5f;
+        centreChunkPos.z -= (worldDimensions / 2.0f) - .5f;
 
         playerRef = GetComponentInParent<fixedWorldGen>().playerRef;// GameObject.Find("FPSController");
         fpsControllerRef = GetComponentInParent<fixedWorldGen>().fpsControllerRef;
@@ -72,6 +84,11 @@ public class chunkDistanceCalc : MonoBehaviour
                 transform.GetChild(0).transform.GetChild(childBlockIndex).gameObject.SetActive(false);
             }
         }*/
+
+        if (transform.position.y > 0)
+        {
+            StartCoroutine(settleBlocks());
+        }
     }
 
     public void breakBlocks()
@@ -80,6 +97,7 @@ public class chunkDistanceCalc : MonoBehaviour
         {
             transform.GetChild(0).transform.GetChild(UnityEngine.Random.Range(0, cubedWorldDimensions-1)).GetComponent<BlockBreaking>().instaKillBlock();
         }
+        smoothBlocks();
     }
 
     private IEnumerator determineBlockStates()
@@ -124,16 +142,16 @@ public class chunkDistanceCalc : MonoBehaviour
                     backBrokenBlocks.Add(blockIndex);
                 }
             }
-            if(exposedBlocks[blockIndex] == 2 && childrenBlocks.transform.position.y == 0)
+            if(exposedBlocks[blockIndex] == 2 && childrenBlocks.transform.position.y == 1)
             {
                 changeBlockState(blockIndex, 1);
             }
             blockIndex++;
         }
-        if (transform.position.y == 0)
+        /*if (transform.position.y == 1)
         {
             GameObject.Find("OriginPoint").GetComponent<genMobsOnChunks>().spawnMob(transform);
-        }
+        }*/
     }
     private Vector3 posToCheck;
     private bool chunkTop, chunkRight, chunkBottom, chunkLeft, chunkFront, chunkBack, allChunks;
@@ -346,6 +364,7 @@ public class chunkDistanceCalc : MonoBehaviour
         {
             
             exposedBlocks[blockNum] = stateNum;
+            transform.GetChild(0).transform.GetChild(blockNum).GetComponent<BlockBreaking>().blockStatus = stateNum;
         }
         if(stateNum == 1 && transform.childCount == 2)
         {
@@ -354,6 +373,8 @@ public class chunkDistanceCalc : MonoBehaviour
         }
         if(stateNum == 0)
         {
+            //UnityEngine.Debug.Log("1\t\t"+blockNum);
+
             transform.GetChild(0).transform.GetChild(blockNum).gameObject.SetActive(false);
             //breakBlockAndShowSurrounds(blockNum);
             breakBlockAndShowSurroundsNew(blockNum);
@@ -481,6 +502,7 @@ public class chunkDistanceCalc : MonoBehaviour
 
     private void breakBlockAndShowSurroundsNew(int blockChildNum)
     {
+        //UnityEngine.Debug.Log("4\t\t" + blockChildNum);
         GameObject foundChunk;
 
         //top
@@ -644,33 +666,70 @@ public class chunkDistanceCalc : MonoBehaviour
     Vector3 targetDir;
     float angle;
     float chunkDistance;
+
+    /// <summary>
+    /// TODO
+    /// Randomize the blocks that are broken initially
+    /// </summary>
+    /// <returns></returns>
     private IEnumerator checkIFShouldShowAngle()
     {
-        while(true)
+        while (true)
         {
+            viewDistanceControl = GetComponentInParent<fixedWorldGen>().viewDistance;
             yield return new WaitForSeconds(.2f);
             //yield return new WaitForFixedUpdate();
 
             chunkDistance = Vector3.Distance(transform.position, playerRef.transform.position);
 
-            if (chunkDistance < viewDistanceControl / 2)
+            /*if (chunkDistance < viewDistanceControl / 2)
             {
                 if(!showingClose)
                 {
                     showAllActiveBlocks();
                 }
             }
-            else if(chunkDistance < viewDistanceControl)
+            else if(chunkDistance < viewDistanceControl)*/
+            if (chunkDistance >= viewDistanceControl)
             {
-                targetDir = transform.position - fpsControllerRef.transform.position;
+                //targetDir = transform.position - fpsControllerRef.transform.position;
+                //targetDir = fpsControllerRef.transform.position - transform.position;
+                targetDir = fpsControllerRef.transform.position - centreChunkPos;
 
                 angle = Vector3.Angle(targetDir, playerRef.transform.forward);
                 if (angle < 100.0f)
                 {
-                    if (!showingClose)
+                    //Vector3 rayDirection = (fpsControllerRef.transform.GetChild(1).position - centreChunkPos).normalized;
+                    float rayDistance = Vector3.Distance(fpsControllerRef.transform.GetChild(1).position, centreChunkPos);
+                    if (rayDistance >= viewDistanceControl)
+                    {
+                        int layerMask = 1 << 15;
+                        if (Physics.Raycast(centreChunkPos, targetDir.normalized, rayDistance, layerMask))
+                        {
+                            if (showingClose)
+                            {
+                                hideActiveBlocks();
+                            }
+                        }
+                        else
+                        {
+                            if (!showingClose)
+                            {
+                                showAllActiveBlocks();
+                            }
+                        }
+                    }
+                    else if (rayDistance < viewDistanceControl)
+                    {
+                        if (!showingClose)
+                        {
+                            showAllActiveBlocks();
+                        }
+                    }
+                    /*if (!showingClose)
                     {
                         showAllActiveBlocks();
-                    }
+                    }*/
                     //UnityEngine.Debug.Log("Looking at" + transform.GetSiblingIndex());
                 }
                 else
@@ -683,10 +742,161 @@ public class chunkDistanceCalc : MonoBehaviour
             }
             else
             {
-                if(showingClose)
+                if (!showingClose)
+                {
+                    showAllActiveBlocks();
+                }
+                /*if (showingClose)
+                {
+                    hideActiveBlocks();
+                }*/
+            }
+        }
+    }
+
+    //private void settleBlocks()
+    bool firstSettle = true;
+    private IEnumerator settleBlocks()
+    {
+        //yield return new WaitForSeconds(1);
+        yield return new WaitForFixedUpdate();
+        bool blockMoved = true;
+        int blocksMoved = 0;
+
+        while (blockMoved)
+        {
+            //yield return new WaitForFixedUpdate();
+            //yield return new WaitForSeconds(.5f);
+            blockMoved = false;
+            //foreach (int blockNum in exposedBlocks)
+            for(int blockNum = 0; blockNum < exposedBlocks.Length; blockNum++)
+            {
+                int blockBelow = blockNum + squaredWorldDimensions;
+                if (blockBelow < exposedBlocks.Length && exposedBlocks[blockBelow] == 0 && exposedBlocks[blockNum] == 1)
+                {
+                    //UnityEngine.Debug.Log("settled " + blockNum);
+                    changeBlockState(blockNum, 0);
+                    changeBlockState(blockBelow, 1);
+                    blocksMoved++;
+                    //exposedBlocks[blockNum] = 0;
+                    //exposedBlocks[blockBelow] = 1;
+                    blockMoved = true;
+                }
+            }
+        }
+        //UnityEngine.Debug.Log(blocksMoved);
+        if (firstSettle)
+        {
+            firstSettle = false;
+            smoothBlocks();
+        }
+        else
+        {
+            if (transform.position.y == 1)
+            {
+                GameObject.Find("OriginPoint").GetComponent<genMobsOnChunks>().spawnMob(transform);
+            }
+        }
+    }
+
+    //private IEnumerator smoothBlocks()
+    private void smoothBlocks()
+    {
+        for (int blockNum = 0; blockNum < exposedBlocks.Length; blockNum++)
+        {
+            if (exposedBlocks[blockNum] == 1)
+            {
+                int blockLeft = blockNum - 1;
+                int blockRight = blockNum + 1;
+
+                int blockUp = blockNum - worldDimensions;
+                int blockDown = blockNum + worldDimensions;
+
+                int blockUpLeft = blockNum - (worldDimensions + 1);
+                int blockUpRight = blockNum - (worldDimensions - 1);
+
+                int blockDownLeft = blockNum + (worldDimensions - 1);
+                int blockDownRight = blockNum + (worldDimensions + 1);
+
+                if (blockLeft >= 0 && blockRight < exposedBlocks.Length && exposedBlocks[blockLeft] == 0 && exposedBlocks[blockRight] == 0)
+                {
+                    changeBlockState(blockNum, 0);
+                }
+                if (blockUp >= 0 && blockDown < exposedBlocks.Length && exposedBlocks[blockUp] == 0 && exposedBlocks[blockDown] == 0)
+                {
+                    changeBlockState(blockNum, 0);
+                }
+                if(blockUpLeft >= 0 && blockDownRight < exposedBlocks.Length && exposedBlocks[blockUpLeft] == 0 && exposedBlocks[blockDownRight] == 0)
+                {
+                    changeBlockState(blockNum, 0);
+                }
+                if (blockUpRight >= 0 && blockDownLeft < exposedBlocks.Length && exposedBlocks[blockUpRight] == 0 && exposedBlocks[blockDownLeft] == 0)
+                {
+                    changeBlockState(blockNum, 0);
+                }
+            }
+        }
+        if (transform.position.y > 0)
+        {
+            StartCoroutine(settleBlocks());
+        }
+    }
+
+    //private IEnumerator checkVisibleByRay()
+    void Updated()
+    {   
+        //yield return new WaitForFixedUpdate();
+        RaycastHit hit;
+        
+        /*Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+        if(Physics.Raycast(ray, out hit))
+        {
+            Debug.DrawLine(ray.origin, hit.point);
+        }*/
+
+        ///Using FPSController's raycastRef
+        Vector3 rayDirection = (fpsControllerRef.transform.GetChild(1).position - centreChunkPos).normalized;
+        float rayDistance = Vector3.Distance(fpsControllerRef.transform.GetChild(1).position, centreChunkPos);
+
+        ///Using FirstPersonCharacter's raycastRef2
+        //Vector3 rayDirection = (playerRef.transform.GetChild(3).position - centreChunkPos).normalized;
+        //float rayDistance = Vector3.Distance(playerRef.transform.GetChild(3).position, centreChunkPos);
+
+        /*if(rayDistance >= viewDistanceControl * 3)
+        {
+            if(showingClose)
+            hideActiveBlocks();
+        }*/
+        if (rayDistance >= viewDistanceControl)// && rayDistance < viewDistanceControl*3)
+        {
+            //10 = blocks   longer view distance but flashing chunks that appear and dissapear  The chunk is hiding its blocks then re-showing them causing the flashing
+            //15 = chunks   short view distance but no flashing chunks
+            int layerMask = 1 << 15;
+
+            //if (Physics.Raycast(centreChunkPos, rayDirection, out hit, rayDistance, layerMask))
+            if (Physics.Raycast(centreChunkPos, rayDirection, rayDistance, layerMask))
+            {
+                //Debug.DrawRay(centreChunkPos, rayDirection * hit.distance, Color.yellow);
+                if (showingClose)
                 {
                     hideActiveBlocks();
                 }
+            }
+            else
+            {
+                //Debug.DrawRay(centreChunkPos, rayDirection * 1000, Color.white);
+                if (!showingClose)
+                {
+                    showAllActiveBlocks();
+                }
+            }
+        }
+        else if(rayDistance < viewDistanceControl)
+        {
+            if (!showingClose)
+            {
+                showAllActiveBlocks();
             }
         }
     }

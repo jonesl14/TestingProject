@@ -16,7 +16,7 @@ public class blockManager : MonoBehaviour
     public GameObject tempParentForPlacedBlocks;
     public GameObject torchTemplate;
 
-    private bool placingTorch = false;
+    
     private int blockTypeCount = 0;
 
 
@@ -103,11 +103,6 @@ public class blockManager : MonoBehaviour
                 blockFound = false;
                 blockTemplateToBePlaced.GetComponent<Renderer>().material = noBlockMat;
             }
-        }
-        if (Input.GetKeyDown(KeyCode.T))
-        {//This really doesn't need to be here
-            placingTorch = !placingTorch;
-            transform.parent.GetChild(2).gameObject.SetActive(placingTorch);
         }
 
         if (Input.GetKeyDown(KeyCode.B))

@@ -11,6 +11,7 @@ public class fixedWorldGen : MonoBehaviour
     public int depthCount;
     public int loopsToPerform;
     public int numOfBlocksToBreak;
+    public int viewDistance;
 
 
     public GameObject worldBlockTemplate;

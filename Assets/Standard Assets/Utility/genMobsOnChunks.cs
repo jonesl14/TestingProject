@@ -32,6 +32,7 @@ public class genMobsOnChunks : MonoBehaviour
         {
             foreach (GameObject objectIndex in objectsToSpawn)
             {
+                ///Calculate what block the spawned mob will land on and then determine what it's y coordinate should be
                 GameObject tempMob = Instantiate(objectIndex, objectToSpawnOver);
                 tempMob.transform.position = new Vector3(
                     tempMob.transform.position.x + mobIndex + Random.Range(0, worldDimensions),

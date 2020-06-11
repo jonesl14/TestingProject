@@ -59,7 +59,7 @@ public class dynamicChunkBuilder : MonoBehaviour
                     GameObject tempNewBlock = Instantiate(blockToSpawn, spawnLocation, transform.rotation, childBlockHolder.transform);
                     //Instantiate(blockToSpawn, spawnLocation, transform.rotation, childBlockHolder.transform).SetActive(false);
                     tempNewBlock.SetActive(false);
-                    tempNewBlock.name = blockName + "";
+                    //tempNewBlock.name = blockName + "";
                     blockName++;
                 }
             }
