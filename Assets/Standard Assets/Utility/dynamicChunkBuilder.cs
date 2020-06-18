@@ -56,9 +56,9 @@ public class dynamicChunkBuilder : MonoBehaviour
                 for (int xDimension = 0; xDimension < chunkDimensions; xDimension++)
                 {
                     spawnLocation.x = xDimension + transform.position.x;
-                    GameObject tempNewBlock = Instantiate(blockToSpawn, spawnLocation, transform.rotation, childBlockHolder.transform);
-                    //Instantiate(blockToSpawn, spawnLocation, transform.rotation, childBlockHolder.transform).SetActive(false);
-                    tempNewBlock.SetActive(false);
+                    //GameObject tempNewBlock = Instantiate(blockToSpawn, spawnLocation, transform.rotation, childBlockHolder.transform);
+                    Instantiate(blockToSpawn, spawnLocation, transform.rotation, childBlockHolder.transform).SetActive(false);
+                    //tempNewBlock.SetActive(false);
                     //tempNewBlock.name = blockName + "";
                     blockName++;
                 }

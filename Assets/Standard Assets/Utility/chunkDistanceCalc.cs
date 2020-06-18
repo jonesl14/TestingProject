@@ -97,7 +97,8 @@ public class chunkDistanceCalc : MonoBehaviour
         {
             transform.GetChild(0).transform.GetChild(UnityEngine.Random.Range(0, cubedWorldDimensions-1)).GetComponent<BlockBreaking>().instaKillBlock();
         }
-        smoothBlocks();
+        if(transform.position.y < 0)
+            smoothBlocks();
     }
 
     private IEnumerator determineBlockStates()
@@ -364,7 +365,7 @@ public class chunkDistanceCalc : MonoBehaviour
         {
             
             exposedBlocks[blockNum] = stateNum;
-            transform.GetChild(0).transform.GetChild(blockNum).GetComponent<BlockBreaking>().blockStatus = stateNum;
+            //transform.GetChild(0).transform.GetChild(blockNum).GetComponent<BlockBreaking>().blockStatus = stateNum;
         }
         if(stateNum == 1 && transform.childCount == 2)
         {
@@ -663,49 +664,59 @@ public class chunkDistanceCalc : MonoBehaviour
             }
         }
     }
-    Vector3 targetDir;
+    Vector3 targetDirTop, targetDirBottom;
     float angle;
     float chunkDistance;
 
     /// <summary>
-    /// TODO
-    /// Randomize the blocks that are broken initially
+    /// Calculate where the ray should be cast from based on where the player is in relation to the chunk
+    /// the direction to the player is known, calculate where on the edge of the chunk that would intersect.
+    /// calculate the x,y and z distances independently and scale them back to fit within the chunk
     /// </summary>
     /// <returns></returns>
     private IEnumerator checkIFShouldShowAngle()
     {
+        Vector3 topOfCentreChunk = centreChunkPos;
+        topOfCentreChunk.y = centreChunkPos.y + worldDimensions;
+        //Vector3 bottomOfCentreChunk = centreChunkPos;
+        //bottomOfCentreChunk.y = centreChunkPos.y - worldDimensions;
+
+        int layerMask = 1 << 10;
         while (true)
         {
             viewDistanceControl = GetComponentInParent<fixedWorldGen>().viewDistance;
-            yield return new WaitForSeconds(.2f);
-            //yield return new WaitForFixedUpdate();
+            //yield return new WaitForSeconds(.2f);
+            yield return new WaitForFixedUpdate();
 
-            chunkDistance = Vector3.Distance(transform.position, playerRef.transform.position);
-
-            /*if (chunkDistance < viewDistanceControl / 2)
-            {
-                if(!showingClose)
-                {
-                    showAllActiveBlocks();
-                }
-            }
-            else if(chunkDistance < viewDistanceControl)*/
+            chunkDistance = Vector3.Distance(transform.position, fpsControllerRef.transform.position);
+            
             if (chunkDistance >= viewDistanceControl)
             {
                 //targetDir = transform.position - fpsControllerRef.transform.position;
                 //targetDir = fpsControllerRef.transform.position - transform.position;
-                targetDir = fpsControllerRef.transform.position - centreChunkPos;
+                targetDirTop = fpsControllerRef.transform.position - topOfCentreChunk;
+                //targetDirBottom = fpsControllerRef.transform.position - bottomOfCentreChunk;
 
-                angle = Vector3.Angle(targetDir, playerRef.transform.forward);
-                if (angle < 100.0f)
+                //angle = Vector3.Angle(topOfCentreChunk, fpsControllerRef.transform.position.normalized+fpsControllerRef.transform.forward);
+                //angle = Vector3.Angle(topOfCentreChunk, fpsControllerRef.transform.forward);
+                angle = Vector3.Angle(fpsControllerRef.transform.forward, targetDirTop);
+                //angle = Vector3.Angle(Camera.main.transform.forward, targetDirTop);
+
+                if ((angle) > Camera.main.fieldOfView)
                 {
                     //Vector3 rayDirection = (fpsControllerRef.transform.GetChild(1).position - centreChunkPos).normalized;
-                    float rayDistance = Vector3.Distance(fpsControllerRef.transform.GetChild(1).position, centreChunkPos);
+                    float rayDistance = Vector3.Distance(fpsControllerRef.transform.position, topOfCentreChunk);
+                    //UnityEngine.Debug.Log(rayDistance);
                     if (rayDistance >= viewDistanceControl)
                     {
-                        int layerMask = 1 << 15;
-                        if (Physics.Raycast(centreChunkPos, targetDir.normalized, rayDistance, layerMask))
+                        if (Physics.Raycast(topOfCentreChunk, targetDirTop.normalized, rayDistance, layerMask))
+                            //&& Physics.Raycast(bottomOfCentreChunk, targetDirBottom.normalized, rayDistance, layerMask))
                         {
+                            //UnityEngine.Debug.DrawRay(topOfCentreChunk, targetDir.normalized, Color.yellow, Mathf.Infinity);
+                            /*if (!showingClose)
+                            {
+                                showAllActiveBlocks();
+                            }*/
                             if (showingClose)
                             {
                                 hideActiveBlocks();
@@ -713,6 +724,10 @@ public class chunkDistanceCalc : MonoBehaviour
                         }
                         else
                         {
+                            /*if (showingClose)
+                            {
+                                hideActiveBlocks();
+                            }*/
                             if (!showingClose)
                             {
                                 showAllActiveBlocks();
@@ -784,19 +799,29 @@ public class chunkDistanceCalc : MonoBehaviour
                 }
             }
         }
+        
+        if(!firstSettle && transform.position.y > 0)
+        {
+            //yield return new WaitForSeconds(2);
+            //UnityEngine.Debug.Log("settle");
+            //GetComponentInParent<genMobsOnChunks>().spawnMob(transform);
+            GameObject.Find("OriginPoint").GetComponent<genMobsOnChunks>().spawnMob(transform);
+        }
         //UnityEngine.Debug.Log(blocksMoved);
         if (firstSettle)
         {
+            //yield return new WaitForFixedUpdate();
+            yield return new WaitForSeconds(1);
             firstSettle = false;
             smoothBlocks();
         }
-        else
+        /*else
         {
-            if (transform.position.y == 1)
+            if (transform.position.y >0)
             {
-                GameObject.Find("OriginPoint").GetComponent<genMobsOnChunks>().spawnMob(transform);
+                //GameObject.Find("OriginPoint").GetComponent<genMobsOnChunks>().spawnMob(transform);
             }
-        }
+        }*/
     }
 
     //private IEnumerator smoothBlocks()
@@ -818,19 +843,39 @@ public class chunkDistanceCalc : MonoBehaviour
                 int blockDownLeft = blockNum + (worldDimensions - 1);
                 int blockDownRight = blockNum + (worldDimensions + 1);
 
+                int blockDownFront2 = blockNum + ((squaredWorldDimensions * 2) - worldDimensions);
+                int blockDownBack2 = blockNum + ((squaredWorldDimensions * 2) + worldDimensions);
+
                 if (blockLeft >= 0 && blockRight < exposedBlocks.Length && exposedBlocks[blockLeft] == 0 && exposedBlocks[blockRight] == 0)
                 {
                     changeBlockState(blockNum, 0);
                 }
-                if (blockUp >= 0 && blockDown < exposedBlocks.Length && exposedBlocks[blockUp] == 0 && exposedBlocks[blockDown] == 0)
+                else if (blockUp >= 0 && blockDown < exposedBlocks.Length && exposedBlocks[blockUp] == 0 && exposedBlocks[blockDown] == 0)
                 {
                     changeBlockState(blockNum, 0);
                 }
-                if(blockUpLeft >= 0 && blockDownRight < exposedBlocks.Length && exposedBlocks[blockUpLeft] == 0 && exposedBlocks[blockDownRight] == 0)
+                else if (blockUpLeft >= 0 && blockDownRight < exposedBlocks.Length && exposedBlocks[blockUpLeft] == 0 && exposedBlocks[blockDownRight] == 0)
                 {
                     changeBlockState(blockNum, 0);
                 }
-                if (blockUpRight >= 0 && blockDownLeft < exposedBlocks.Length && exposedBlocks[blockUpRight] == 0 && exposedBlocks[blockDownLeft] == 0)
+                else if (blockUpRight >= 0 && blockDownLeft < exposedBlocks.Length && exposedBlocks[blockUpRight] == 0 && exposedBlocks[blockDownLeft] == 0)
+                {
+                    changeBlockState(blockNum, 0);
+                }
+
+                else if ((blockDownLeft + (worldDimensions-1)) < exposedBlocks.Length && exposedBlocks[blockDownLeft + (worldDimensions - 1)] == 0)
+                {
+                    changeBlockState(blockNum, 0);
+                }
+                else if ((blockDownRight + (worldDimensions + 1)) < exposedBlocks.Length && exposedBlocks[blockDownRight + (worldDimensions + 1)] == 0)
+                {
+                    changeBlockState(blockNum, 0);
+                }
+                else if (blockDownFront2 < exposedBlocks.Length && exposedBlocks[blockDownFront2] == 0)
+                {
+                    changeBlockState(blockNum, 0);
+                }
+                else if (blockDownBack2 < exposedBlocks.Length && exposedBlocks[blockDownBack2] == 0)
                 {
                     changeBlockState(blockNum, 0);
                 }

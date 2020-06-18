@@ -154,6 +154,7 @@ public class fixedWorldGen : MonoBehaviour
             {
                 chunkPosition.z = originVector.z;
                 //yield return new WaitForFixedUpdate();
+                //yield return new WaitForSeconds(.5f);
                 if (loopsPerformed > 0)
                 {
                     tempLoopsPerformed = loopsPerformed;

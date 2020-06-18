@@ -59,6 +59,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac077041fc79dbd4e9ca19948c2d135e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playerRef: {fileID: 0}
+  fpsControllerRef: {fileID: 0}
   worldDimensions: 0
   squaredWorldDimensions: 0
   cubedWorldDimensions: 0
