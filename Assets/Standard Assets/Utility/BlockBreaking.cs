@@ -26,29 +26,21 @@ public class BlockBreaking : MonoBehaviour
     bool showingClose = false;
     int tempViewDistance = 10;
 
-    private void Updated()
+    //private void Updated()
+    private IEnumerator raycastBlocks()
     {
-        //if (transform.parent.GetComponentInParent<chunkDistanceCalc>().fpsControllerRef && blockStatus == 1)
+        yield return new WaitForSeconds(.2f);
         if(blockStatus == 1)
         {
-            RaycastHit hit;
-
-            //Vector3 rayDirection = (transform.parent.GetComponentInParent<chunkDistanceCalc>().fpsControllerRef.transform.GetChild(1).position - transform.position).normalized;
-            //float rayDistance = Vector3.Distance(transform.parent.GetComponentInParent<chunkDistanceCalc>().fpsControllerRef.transform.GetChild(1).position, transform.position);
-
             Vector3 rayDirection = (fpsControllerRayRef.position - transform.position).normalized;
             float rayDistance = Vector3.Distance(fpsControllerRayRef.position, transform.position);
 
             if (rayDistance >= tempViewDistance)// && rayDistance < 10 * 3)
             {
-                //10 = blocks   longer view distance but flashing chunks that appear and dissapear
-                //15 = chunks   short view distance but no flashing chunks
                 int layerMask = 1 << 10;
 
-                //if (Physics.Raycast(transform.position, rayDirection, out hit, rayDistance, layerMask))
                 if (Physics.Raycast(transform.position, rayDirection, rayDistance, layerMask))
                 {
-                    //Debug.DrawRay(centreChunkPos, rayDirection * hit.distance, Color.yellow);
                     if (showingClose)
                     {
                         GetComponent<Renderer>().enabled = false;
@@ -57,7 +49,6 @@ public class BlockBreaking : MonoBehaviour
                 }
                 else
                 {
-                    //Debug.DrawRay(centreChunkPos, rayDirection * 1000, Color.white);
                     if (!showingClose)
                     {
                         GetComponent<Renderer>().enabled = true;

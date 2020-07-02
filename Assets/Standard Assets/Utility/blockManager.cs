@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityStandardAssets.CrossPlatformInput;
 
 public class blockManager : MonoBehaviour
@@ -15,6 +16,7 @@ public class blockManager : MonoBehaviour
     public GameObject blockTemplate;
     public GameObject tempParentForPlacedBlocks;
     public GameObject torchTemplate;
+    public GameObject UIref;
 
     
     private int blockTypeCount = 0;
@@ -37,20 +39,40 @@ public class blockManager : MonoBehaviour
         {
             gatheredBlocksValues[blockMaterialValue] = 1;
         }
+        if(placingBlockMaterial == blockMaterialValue)
+        {
+            UIref.GetComponent<Text>().text = placingBlockMaterial + "\t" + gatheredBlocksValues[blockMaterialValue];
+        }
     }
 
     private int removeBlock(int blockMaterialValue)
     {
-        Debug.Log("removed block " + blockMaterialValue);
+        //Debug.Log("removed block " + blockMaterialValue);
         if (gatheredBlocksValues.ContainsKey(blockMaterialValue))
         {
             if (gatheredBlocksValues[blockMaterialValue] > 0)
             {
                 --gatheredBlocksValues[blockMaterialValue];
+                if (placingBlockMaterial == blockMaterialValue)
+                {
+                    UIref.GetComponent<Text>().text = placingBlockMaterial + "\t" + gatheredBlocksValues[blockMaterialValue];
+                }
                 return gatheredBlocksValues[blockMaterialValue];
             }
         }
         return -1;
+    }
+
+    public int getCountOfBlock(int blockTypeNum)
+    {
+        if(gatheredBlocksValues.ContainsKey(blockTypeNum))
+        {
+            return gatheredBlocksValues[blockTypeNum];
+        }
+        else
+        {
+            return 0;
+        }
     }
 
 
@@ -60,48 +82,56 @@ public class blockManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Q) && placingBlockMaterial > 0)
         {
             placingBlockMaterial--;
+            UIref.GetComponent<Text>().text = placingBlockMaterial + "\t";// + gatheredBlocksValues[placingBlockMaterial];
             if (gatheredBlocksValues.ContainsKey(placingBlockMaterial))
             {
                 if (gatheredBlocksValues[placingBlockMaterial] > 0)
                 {
                     blockFound = true;
                     blockTemplateToBePlaced.GetComponent<Renderer>().material = (Material)Resources.Load("BlockArt/4-All/" + placingBlockMaterial);
+                    UIref.GetComponent<Text>().text += ""+gatheredBlocksValues[placingBlockMaterial];
                     return;
                 }
                 else
                 {
                     blockFound = false;
                     blockTemplateToBePlaced.GetComponent<Renderer>().material = noBlockMat;
+                    UIref.GetComponent<Text>().text += "" + 0;
                 }
             }
             else
             {
                 blockFound = false;
                 blockTemplateToBePlaced.GetComponent<Renderer>().material = noBlockMat;
+                UIref.GetComponent<Text>().text += "" + 0;
             }
         }
 
         if (Input.GetKeyDown(KeyCode.E) && placingBlockMaterial < blockTypeCount - 1)
         {
             placingBlockMaterial++;
+            UIref.GetComponent<Text>().text = placingBlockMaterial + "\t";
             if (gatheredBlocksValues.ContainsKey(placingBlockMaterial))
             {
                 if (gatheredBlocksValues[placingBlockMaterial] > 0)
                 {
                     blockFound = true;
                     blockTemplateToBePlaced.GetComponent<Renderer>().material = (Material)Resources.Load("BlockArt/4-All/" + placingBlockMaterial);
+                    UIref.GetComponent<Text>().text += "" + gatheredBlocksValues[placingBlockMaterial];
                     return;
                 }
                 else
                 {
                     blockFound = false;
                     blockTemplateToBePlaced.GetComponent<Renderer>().material = noBlockMat;
+                    UIref.GetComponent<Text>().text += "" + 0;
                 }
             }
             else
             {
                 blockFound = false;
                 blockTemplateToBePlaced.GetComponent<Renderer>().material = noBlockMat;
+                UIref.GetComponent<Text>().text += "" + 0;
             }
         }
 

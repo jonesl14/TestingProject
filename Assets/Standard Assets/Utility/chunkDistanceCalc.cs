@@ -320,8 +320,12 @@ public class chunkDistanceCalc : MonoBehaviour
                 transform.GetChild(0).transform.GetChild(childBlockIndex).gameObject.SetActive(true);
             }
         }*/
-        transform.GetChild(1).gameObject.SetActive(true);
-        transform.GetChild(0).gameObject.SetActive(true);
+        foreach(Transform childTransform in transform)
+        {
+            childTransform.gameObject.SetActive(true);
+        }
+        //transform.GetChild(1).gameObject.SetActive(true);
+        //transform.GetChild(0).gameObject.SetActive(true);
         showingClose = true;
     }
     private void showActiveBlocks()
@@ -337,8 +341,12 @@ public class chunkDistanceCalc : MonoBehaviour
                 transform.GetChild(0).transform.GetChild(childBlockIndex).gameObject.SetActive(false);
             }
         }
-        transform.GetChild(1).gameObject.SetActive(true);
-        transform.GetChild(0).gameObject.SetActive(true);
+        foreach (Transform childTransform in transform)
+        {
+            childTransform.gameObject.SetActive(true);
+        }
+        //transform.GetChild(1).gameObject.SetActive(true);
+        //transform.GetChild(0).gameObject.SetActive(true);
         showing = true;
         showingClose = false;
     }
@@ -351,14 +359,20 @@ public class chunkDistanceCalc : MonoBehaviour
                 transform.GetChild(0).transform.GetChild(childBlockIndex).gameObject.SetActive(false);
             }
         }*/
-        transform.GetChild(1).gameObject.SetActive(false);
-        transform.GetChild(0).gameObject.SetActive(false);
+        foreach (Transform childTransform in transform)
+        {
+            childTransform.gameObject.SetActive(false);
+        }
+        //transform.GetChild(1).gameObject.SetActive(false);
+        //transform.GetChild(0).gameObject.SetActive(false);
         showing = false;
         showingClose = false;
     }
 
+    
     public void changeBlockState(int blockNum, int stateNum)
     {
+        bool anyBroken = false;
         //0 is an inactive block
         //1 is an active block with the active flag(has been exposed)
         //2 is an inactive block with the active flag(has not been exposed)
@@ -379,6 +393,22 @@ public class chunkDistanceCalc : MonoBehaviour
             transform.GetChild(0).transform.GetChild(blockNum).gameObject.SetActive(false);
             //breakBlockAndShowSurrounds(blockNum);
             breakBlockAndShowSurroundsNew(blockNum);
+
+            foreach(int blockIndex in exposedBlocks)
+            {
+                if(blockIndex != 0)
+                {
+                    anyBroken = true;
+                }
+            }
+            if(!anyBroken)
+            {
+                //StopAllCoroutines();
+                Destroy(transform.GetChild(0).gameObject);
+                //hideActiveBlocks();
+
+                UnityEngine.Debug.Log(transform.position + " all blocks broken");
+            }
         }
         showing = false;
         showingClose = false;
@@ -667,56 +697,40 @@ public class chunkDistanceCalc : MonoBehaviour
     Vector3 targetDirTop, targetDirBottom;
     float angle;
     float chunkDistance;
-
-    /// <summary>
-    /// Calculate where the ray should be cast from based on where the player is in relation to the chunk
-    /// the direction to the player is known, calculate where on the edge of the chunk that would intersect.
-    /// calculate the x,y and z distances independently and scale them back to fit within the chunk
-    /// </summary>
-    /// <returns></returns>
     private IEnumerator checkIFShouldShowAngle()
     {
-        Vector3 topOfCentreChunk = centreChunkPos;
-        topOfCentreChunk.y = centreChunkPos.y + worldDimensions;
+        //Vector3 topOfCentreChunk = centreChunkPos;
+        //topOfCentreChunk.y = centreChunkPos.y + worldDimensions;
+        Collider thisCollider = GetComponent<Collider>();
         //Vector3 bottomOfCentreChunk = centreChunkPos;
         //bottomOfCentreChunk.y = centreChunkPos.y - worldDimensions;
-
+        Vector3 edgeOfChunk;// = GetComponent<Collider>().ClosestPoint(fpsControllerRef.transform.position);
         int layerMask = 1 << 10;
         while (true)
         {
-            viewDistanceControl = GetComponentInParent<fixedWorldGen>().viewDistance;
-            //yield return new WaitForSeconds(.2f);
-            yield return new WaitForFixedUpdate();
+            //viewDistanceControl = GetComponentInParent<fixedWorldGen>().viewDistance;
+            yield return new WaitForSeconds(.2f);
+            //yield return new WaitForFixedUpdate();
 
-            chunkDistance = Vector3.Distance(transform.position, fpsControllerRef.transform.position);
-            
-            if (chunkDistance >= viewDistanceControl)
+            chunkDistance = Vector3.Distance(transform.position, fpsControllerRef.transform.GetChild(1).transform.position);
+
+            edgeOfChunk = thisCollider.ClosestPoint(fpsControllerRef.transform.GetChild(1).transform.position);
+            //GameObject.Find("tempShow").transform.position = edgeOfChunk;
+
+            //if (chunkDistance >= viewDistanceControl)
             {
-                //targetDir = transform.position - fpsControllerRef.transform.position;
-                //targetDir = fpsControllerRef.transform.position - transform.position;
-                targetDirTop = fpsControllerRef.transform.position - topOfCentreChunk;
-                //targetDirBottom = fpsControllerRef.transform.position - bottomOfCentreChunk;
+                targetDirTop = fpsControllerRef.transform.GetChild(1).transform.position - edgeOfChunk;
+                angle = Vector3.Angle(fpsControllerRef.transform.GetChild(1).transform.forward, targetDirTop);
+                //UnityEngine.Debug.Log(angle);
 
-                //angle = Vector3.Angle(topOfCentreChunk, fpsControllerRef.transform.position.normalized+fpsControllerRef.transform.forward);
-                //angle = Vector3.Angle(topOfCentreChunk, fpsControllerRef.transform.forward);
-                angle = Vector3.Angle(fpsControllerRef.transform.forward, targetDirTop);
-                //angle = Vector3.Angle(Camera.main.transform.forward, targetDirTop);
-
-                if ((angle) > Camera.main.fieldOfView)
+                if ((angle) >= Camera.main.fieldOfView || angle == 0)
                 {
-                    //Vector3 rayDirection = (fpsControllerRef.transform.GetChild(1).position - centreChunkPos).normalized;
-                    float rayDistance = Vector3.Distance(fpsControllerRef.transform.position, topOfCentreChunk);
-                    //UnityEngine.Debug.Log(rayDistance);
-                    if (rayDistance >= viewDistanceControl)
+                    float rayDistance = Vector3.Distance(fpsControllerRef.transform.GetChild(1).transform.position, edgeOfChunk);
+
+                    //if (rayDistance >= viewDistanceControl)
                     {
-                        if (Physics.Raycast(topOfCentreChunk, targetDirTop.normalized, rayDistance, layerMask))
-                            //&& Physics.Raycast(bottomOfCentreChunk, targetDirBottom.normalized, rayDistance, layerMask))
+                        if (Physics.Raycast(edgeOfChunk, targetDirTop.normalized, rayDistance, layerMask))
                         {
-                            //UnityEngine.Debug.DrawRay(topOfCentreChunk, targetDir.normalized, Color.yellow, Mathf.Infinity);
-                            /*if (!showingClose)
-                            {
-                                showAllActiveBlocks();
-                            }*/
                             if (showingClose)
                             {
                                 hideActiveBlocks();
@@ -724,48 +738,39 @@ public class chunkDistanceCalc : MonoBehaviour
                         }
                         else
                         {
-                            /*if (showingClose)
-                            {
-                                hideActiveBlocks();
-                            }*/
                             if (!showingClose)
                             {
                                 showAllActiveBlocks();
                             }
                         }
                     }
-                    else if (rayDistance < viewDistanceControl)
+                    /*else if (rayDistance < viewDistanceControl)
                     {
                         if (!showingClose)
                         {
                             showAllActiveBlocks();
                         }
-                    }
-                    /*if (!showingClose)
-                    {
-                        showAllActiveBlocks();
                     }*/
-                    //UnityEngine.Debug.Log("Looking at" + transform.GetSiblingIndex());
                 }
                 else
                 {
-                    if (showingClose)
+                    if(chunkDistance < (worldDimensions + (worldDimensions/2)))
+                    {
+                        showAllActiveBlocks();
+                    }
+                    else if (showingClose)
                     {
                         hideActiveBlocks();
                     }
                 }
             }
-            else
+            /*else
             {
                 if (!showingClose)
                 {
                     showAllActiveBlocks();
                 }
-                /*if (showingClose)
-                {
-                    hideActiveBlocks();
-                }*/
-            }
+            }*/
         }
     }
 

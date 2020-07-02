@@ -1,11 +1,14 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityStandardAssets.Characters.FirstPerson;
 
 public class playerExtraControls : MonoBehaviour
 {
     private bool placingTorch = false;
     bool downSwing = false, upSwing = false;
+    public GameObject UIrefInteractables;
+
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.T))
@@ -43,5 +46,25 @@ public class playerExtraControls : MonoBehaviour
                 }
             }
         }*/
+
+        if(Input.GetKeyDown(KeyCode.M))
+        {
+            UIrefInteractables.SetActive(!UIrefInteractables.activeSelf);
+            GetComponentInParent<FirstPersonController>().enabled = !GetComponentInParent<FirstPersonController>().enabled;
+            Cursor.visible = !Cursor.visible;
+            if (Cursor.visible)
+            {
+                Cursor.lockState = CursorLockMode.Confined;
+            }
+            else
+            {
+                Cursor.lockState = CursorLockMode.Locked;
+            }
+        }
+        if(Input.GetKeyDown(KeyCode.Escape))
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
     }
 }

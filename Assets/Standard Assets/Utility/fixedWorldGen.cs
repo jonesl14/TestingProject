@@ -137,6 +137,7 @@ public class fixedWorldGen : MonoBehaviour
     int tempStoreLoopsPerformed = 0;
     IEnumerator spawnSpiralChunks()
     {
+        List<int> newChunksToBreak = new List<int>();
         //GameObject tempChunkHolder;
         chunkPosition = originVector;
 
@@ -169,6 +170,7 @@ public class fixedWorldGen : MonoBehaviour
                     //tempChunkHolder = Instantiate(chunkToGen, chunkPosition, transform.rotation, transform);//This will make the down-right diagonal
                     //tempChunkHolder.transform.SetSiblingIndex(tempBlockNumbers);
                     Instantiate(chunkToGen, chunkPosition, transform.rotation, transform).transform.SetSiblingIndex(tempBlockNumbers);
+                    newChunksToBreak.Add(tempBlockNumbers);
                     tempBlockNumbers++;
 
                     tempLoopsPerformed = loopsPerformed * 2;
@@ -178,6 +180,7 @@ public class fixedWorldGen : MonoBehaviour
                         //tempChunkHolder = Instantiate(chunkToGen, chunkPosition, transform.rotation, transform);
                         //tempChunkHolder.transform.SetSiblingIndex(tempBlockNumbers);
                         Instantiate(chunkToGen, chunkPosition, transform.rotation, transform).transform.SetSiblingIndex(tempBlockNumbers);
+                        newChunksToBreak.Add(tempBlockNumbers);
                         tempBlockNumbers++;
                         tempLoopsPerformed--;
                     }
@@ -189,6 +192,7 @@ public class fixedWorldGen : MonoBehaviour
                         //tempChunkHolder = Instantiate(chunkToGen, chunkPosition, transform.rotation, transform);
                         //tempChunkHolder.transform.SetSiblingIndex(tempBlockNumbers);
                         Instantiate(chunkToGen, chunkPosition, transform.rotation, transform).transform.SetSiblingIndex(tempBlockNumbers);
+                        newChunksToBreak.Add(tempBlockNumbers);
                         tempBlockNumbers++;
                         tempLoopsPerformed--;
                     }
@@ -200,6 +204,7 @@ public class fixedWorldGen : MonoBehaviour
                         //tempChunkHolder = Instantiate(chunkToGen, chunkPosition, transform.rotation, transform);
                         //tempChunkHolder.transform.SetSiblingIndex(tempBlockNumbers);
                         Instantiate(chunkToGen, chunkPosition, transform.rotation, transform).transform.SetSiblingIndex(tempBlockNumbers);
+                        newChunksToBreak.Add(tempBlockNumbers);
                         tempBlockNumbers++;
                         tempLoopsPerformed--;
                     }
@@ -211,6 +216,7 @@ public class fixedWorldGen : MonoBehaviour
                         //tempChunkHolder = Instantiate(chunkToGen, chunkPosition, transform.rotation, transform);
                         //tempChunkHolder.transform.SetSiblingIndex(tempBlockNumbers);
                         Instantiate(chunkToGen, chunkPosition, transform.rotation, transform).transform.SetSiblingIndex(tempBlockNumbers);
+                        newChunksToBreak.Add(tempBlockNumbers);
                         tempBlockNumbers++;
                         tempLoopsPerformed--;
                     }
@@ -227,6 +233,7 @@ public class fixedWorldGen : MonoBehaviour
                     //tempChunkHolder = Instantiate(chunkToGen, chunkPosition, transform.rotation, transform);
                     //tempChunkHolder.transform.SetSiblingIndex(tempBlockNumbers);
                     Instantiate(chunkToGen, chunkPosition, transform.rotation, transform).transform.SetSiblingIndex(tempBlockNumbers);
+                    newChunksToBreak.Add(tempBlockNumbers);
                     tempBlockNumbers++;
                 }
                 loopsPerformed++;
@@ -252,10 +259,14 @@ public class fixedWorldGen : MonoBehaviour
         UnityEngine.Debug.Log(timeTaken.TotalSeconds);
 
         yield return new WaitForSeconds(1);
-        foreach(Transform childTransform in transform)
+        foreach(int chunkNum in newChunksToBreak)
+        {
+            transform.GetChild(chunkNum).GetComponent<chunkDistanceCalc>().breakBlocks();
+        }
+        /*foreach(Transform childTransform in transform)
         {
             childTransform.gameObject.GetComponent<chunkDistanceCalc>().breakBlocks();
-        }
+        }*/
     }
 
     public int findChunkLoopNum(int nameNum, int direction)
