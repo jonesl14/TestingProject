@@ -25,22 +25,74 @@ public class UIControls : MonoBehaviour
     /// </summary>
     void createButtonClick()
     {
-        switch (buildThingSlider.GetComponent<Slider>().value)
+        //switch (buildThingSlider.GetComponent<Slider>().value)
+        switch(craftDropdown.value)
         {
             case 0:
+                if (blockTrackerRef.GetComponent<blockManager>().getCountOfBlock((int)buildThingSlider.value) > 0)
+                {
+                    craftedGameObject = (GameObject)Instantiate(prefabManagerRef.GetComponent<prefabManager>().getObjectToCraft("buildBlock"), placingBlockTemplateRef.transform.position, transform.rotation);
+                    craftedGameObject.AddComponent<craftedObjectPlacer>().placingBlockTemplateRef = placingBlockTemplateRef;
+                    craftedGameObject.GetComponent<Renderer>().material = (Material)Resources.Load("BlockArt/4-All/" + buildThingSlider.value);
+                    blockTrackerRef.GetComponent<blockManager>().removeBlock((int)buildThingSlider.value);
+                }
+                else
+                {
+                    StartCoroutine(showMessage("Not enough " + buildThingSlider.value + " blocks", 1));
+                }
+                break;
+            case 1:
                 if(blockTrackerRef.GetComponent<blockManager>().getCountOfBlock(12) > 0)
                 {
                     craftedGameObject = (GameObject)Instantiate(prefabManagerRef.GetComponent<prefabManager>().getObjectToCraft("door"), placingBlockTemplateRef.transform.position,transform.rotation);
                     craftedGameObject.AddComponent<craftedObjectPlacer>().placingBlockTemplateRef = placingBlockTemplateRef;
+                    blockTrackerRef.GetComponent<blockManager>().removeBlock(12);
+                    craftedGameObject.GetComponent<Renderer>().material = (Material)Resources.Load("BlockArt/4-All/" + buildThingSlider.value);
+                    craftedGameObject.GetComponent<craftedObjectPlacer>().setMaterial();
+                }
+                else
+                {
+                    StartCoroutine(showMessage("Not enough wood", 1));
                 }
                 break;
-            case 1:
+            case 2:
                 if (blockTrackerRef.GetComponent<blockManager>().getCountOfBlock(12) > 0)
                 {
                     craftedGameObject = (GameObject)Instantiate(prefabManagerRef.GetComponent<prefabManager>().getObjectToCraft("table"), placingBlockTemplateRef.transform.position, transform.rotation);
                     craftedGameObject.AddComponent<craftedObjectPlacer>().placingBlockTemplateRef = placingBlockTemplateRef;
+                    blockTrackerRef.GetComponent<blockManager>().removeBlock(12);
+                    craftedGameObject.GetComponent<Renderer>().material = (Material)Resources.Load("BlockArt/4-All/" + buildThingSlider.value);
+                    craftedGameObject.GetComponent<craftedObjectPlacer>().setMaterial();
+                }
+                else
+                {
+                    StartCoroutine(showMessage("Not enough wood", 1));
+                }
+                break;
+            case 3:
+                if (blockTrackerRef.GetComponent<blockManager>().getCountOfBlock(12) > 0)
+                {
+                    craftedGameObject = (GameObject)Instantiate(prefabManagerRef.GetComponent<prefabManager>().getObjectToCraft("door2"), placingBlockTemplateRef.transform.position, transform.rotation);
+                    craftedGameObject.AddComponent<craftedObjectPlacer>().placingBlockTemplateRef = placingBlockTemplateRef;
+                    blockTrackerRef.GetComponent<blockManager>().removeBlock(12);
+                    craftedGameObject.GetComponent<Renderer>().material = (Material)Resources.Load("BlockArt/4-All/" + buildThingSlider.value);
+                    craftedGameObject.GetComponent<craftedObjectPlacer>().setMaterial();
+                }
+                else
+                {
+                    StartCoroutine(showMessage("Not enough wood", 1));
                 }
                 break;
         }
+    }
+
+    private IEnumerator showMessage(string messageToShow, int timeToShow)
+    {
+        //These messages will get stuck on the screen if the menu is left before the text dissapears
+        transform.parent.GetChild(2).GetComponent<Text>().text = messageToShow;
+
+        yield return new WaitForSeconds(timeToShow);
+
+        transform.parent.GetChild(2).GetComponent<Text>().text = "";
     }
 }

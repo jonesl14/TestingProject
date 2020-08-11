@@ -13,6 +13,7 @@ public class BlockBreaking : MonoBehaviour
 
     private void Awake()
     {
+        if(transform.parent)
         fpsControllerRayRef = transform.parent.GetComponentInParent<chunkDistanceCalc>().fpsControllerRef.transform.GetChild(1);
         //GetComponent<Renderer>().enabled = false;
         if (GetComponentInParent<chunkDistanceCalc>())
@@ -106,7 +107,7 @@ public class BlockBreaking : MonoBehaviour
                 GameObject.Find("blockTracker").GetComponent<blockManager>().addBlock(int.Parse(GetComponent<Renderer>().material.name.Split()[0]));
                 return;
             }
-            if (transform.parent.GetSiblingIndex() == 0)
+            if (transform.parent && transform.parent.GetSiblingIndex() == 0)
             {
                 transform.parent.transform.parent.GetComponent<chunkDistanceCalc>().changeBlockState(transform.GetSiblingIndex(), 0);
             }

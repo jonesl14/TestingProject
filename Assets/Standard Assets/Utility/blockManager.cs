@@ -45,7 +45,7 @@ public class blockManager : MonoBehaviour
         }
     }
 
-    private int removeBlock(int blockMaterialValue)
+    public int removeBlock(int blockMaterialValue)
     {
         //Debug.Log("removed block " + blockMaterialValue);
         if (gatheredBlocksValues.ContainsKey(blockMaterialValue))
